@@ -1,5 +1,5 @@
 # El Excel de trabajo trae datos regionales y notas internas: no se publica.
 datos/fuente/
-node_modules/
+node_modules
 .DS_Store
 Thumbs.db
