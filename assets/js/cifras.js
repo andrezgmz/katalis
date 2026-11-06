@@ -64,6 +64,7 @@
     Chart.defaults.plugins.tooltip.backgroundColor = "#161A2E";
     Chart.defaults.plugins.tooltip.padding = 10;
     Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.layout.padding = { top: 10 };
     return true;
   }
   function dibujar(id, config) {

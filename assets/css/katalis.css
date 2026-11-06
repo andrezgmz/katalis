@@ -91,7 +91,7 @@ a{color:var(--azul)} a:hover{color:var(--azul-osc)}
 .llamado .mono{color:var(--tinta);opacity:.75}
 
 /* Pie */
-.pie{background:var(--tinta);color:var(--gris-claro);padding:48px 0 32px;margin-top:72px;font-size:14px}
+.pie{background:var(--tinta);color:var(--gris-claro);padding:48px 0 32px;font-size:14px}
 .pie .envoltura{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px}
 .pie a{color:var(--gris-claro);text-decoration:none} .pie a:hover{color:var(--crema)}
 .pie h4{color:var(--crema);margin:0 0 10px;font-size:14px}
@@ -210,3 +210,6 @@ a{color:var(--azul)} a:hover{color:var(--azul-osc)}
 .menu .boton-claro{color:var(--tinta)}
 .seccion-blanca .tarjeta-tinta{background:var(--tinta)}
 .valor-num.texto-arcilla{color:var(--rojo)}
+.r-7-5{align-items:start}
+.tarjeta-tinta .cita{color:var(--crema)}
+main>.envoltura:last-child{padding-bottom:72px}
