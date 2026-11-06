@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://katalispartners.com.co/sitemap.xml

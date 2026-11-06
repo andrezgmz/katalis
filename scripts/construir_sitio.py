@@ -16,6 +16,7 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 WHATSAPP = "573167836311"
 CORREO = "andrezgmz@outlook.com"
 LINKEDIN = "https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo"
+DOMINIO = "https://katalispartners.com.co"
 LIBRO_HOTMART = ""  # Pegue aquí el enlace de Hotmart cuando el libro salga a la venta.
 
 
@@ -35,6 +36,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
         f'<a href="{p}{href}"{" aria-current=page" if clave == actual else ""}>{txt}</a>'
         for href, txt, clave in MENU)
     WA = "https://wa.me/" + WHATSAPP
+    url = DOMINIO + "/" + ("" if ruta == "index.html" else ruta.removesuffix("index.html"))
     html = f'''<!doctype html>
 <html lang="es">
 <head>
@@ -46,6 +48,8 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
 <meta property="og:title" content="{titulo}">
 <meta property="og:description" content="{descripcion}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{url}">
+<link rel="canonical" href="{url}">
 <meta property="og:locale" content="es_CO">
 <meta name="theme-color" content="#161A2E">
 <link rel="icon" href="{p}assets/img/favicon.svg" type="image/svg+xml">
@@ -104,7 +108,9 @@ def main():
         (RAIZ / ruta).parent.mkdir(parents=True, exist_ok=True)
         (RAIZ / ruta).write_text(html, encoding="utf-8")
         hechas.append(ruta)
-    print("OK:", len(hechas), "páginas:", ", ".join(hechas))
+    urls = "".join(f"<url><loc>{DOMINIO}/{'' if r == 'index.html' else r.removesuffix('index.html')}</loc></url>" for r in hechas if r != "404.html")
+    (RAIZ / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8", newline="\n")
+    print("OK:", len(hechas), "páginas y sitemap.xml:", ", ".join(hechas))
 
 
 if __name__ == "__main__":
