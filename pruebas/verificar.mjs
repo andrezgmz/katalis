@@ -118,7 +118,41 @@ await pag.close();
     if (r.wa !== esperado) falla("estrategia.html", V, `WhatsApp: ${r.wa}`);
     const u = new URL(r.wa);
     if ([...u.searchParams.keys()].join() !== "text") falla("estrategia.html", V, `WhatsApp con parámetros de más: ${u.search}`);
+    // Ejes bajo 2: en Estrategia solo Señal es acento. Rótulo en blanco roto y negrita, punto hueco; nunca coral ni arcilla.
+    if (c.bajos) {
+      const estilos = await rd.evaluate(() => {
+        const cs = (e) => getComputedStyle(e);
+        return {
+          rotulos: [...document.querySelectorAll("#rd-radar .rd-rotulo-eje.rd-bajo")].map((t) => `${cs(t).fill}|${cs(t).fontWeight}`),
+          puntos: [...document.querySelectorAll("#rd-radar .rd-punto.rd-bajo")].map((p) => `${cs(p).fill}|${cs(p).stroke}|${cs(p).strokeWidth}`),
+          texto: `${cs(document.getElementById("rd-bajos")).color}|${cs(document.getElementById("rd-bajos")).fontWeight}`,
+        };
+      });
+      const CREMA = "rgb(247, 244, 238)", TINTA = "rgb(22, 26, 46)", PROHIBIDOS = ["rgb(255, 138, 101)", "rgb(217, 87, 47)", "rgb(166, 58, 31)"];
+      const todo = [...estilos.rotulos, ...estilos.puntos, estilos.texto].join(" ");
+      if (PROHIBIDOS.some((x) => todo.includes(x))) falla("estrategia.html", V, `ejes bajo 2 en coral o arcilla: ${todo}`);
+      if (estilos.rotulos.length !== 2 || estilos.rotulos.some((x) => x !== `${CREMA}|700`)) falla("estrategia.html", V, `rótulos bajo 2: ${estilos.rotulos.join(", ")}`);
+      if (estilos.puntos.length !== 2 || estilos.puntos.some((x) => x !== `${TINTA}|${CREMA}|2px`)) falla("estrategia.html", V, `puntos bajo 2 (deben ser huecos): ${estilos.puntos.join(", ")}`);
+      if (estilos.texto !== `${CREMA}|700`) falla("estrategia.html", V, `texto «Ejes bajo 2»: ${estilos.texto}`);
+    }
   }
+  // Los 8 enunciados aprobados por Andrés (06-nov), en orden, y cada opción con su texto para lectores de pantalla.
+  const ENUNCIADOS = [
+    "¿La transformación digital tiene un presupuesto propio, aprobado por el Consejo de Administración?",
+    "¿Los proyectos digitales los llevan equipos de varias áreas (tecnología, riesgos, operaciones) que trabajan juntos, sin pasar por silos ni comités sucesivos?",
+    "¿Una persona puede afiliarse y abrir su cuenta por canales digitales en menos de 10 minutos, sin ir a una oficina?",
+    "¿El sistema principal se conecta en tiempo real con otras soluciones mediante APIs, sin depender del proveedor original para cada integración?",
+    "¿Usan analítica para anticipar la mora o decidir qué ofrecer a cada asociado?",
+    "¿Hacen pilotos rápidos con fintechs u otros aliados externos para probar ideas nuevas?",
+    "¿Tienen un sistema de gestión de seguridad de la información activo, con simulacros reales, por ejemplo contra ransomware?",
+    "¿Los recaudos por libranza y por pasarelas de pago se concilian de forma automática, sin cuadres manuales?",
+  ];
+  const vistos = await rd.$$eval(".rd-pregunta legend", (ls) => ls.map((l) => l.lastChild.textContent.trim()));
+  ENUNCIADOS.forEach((t, i) => { if (vistos[i] !== t) falla("estrategia.html", V, `enunciado ${i + 1}: «${vistos[i]}»`); });
+  const ESCALA = ["No existe", "Hay intentos aislados", "Está en marcha", "Funciona y se mide", "Es referente"];
+  const etiquetas = await rd.$$eval(".rd-escala input", (is) => is.map((i) => i.getAttribute("aria-label")));
+  const esperadas = Array.from({ length: 8 }, () => ESCALA.map((t, j) => `${j + 1}, ${t}`)).flat();
+  if (etiquetas.join("|") !== esperadas.join("|")) falla("estrategia.html", V, "faltan o sobran aria-label en las opciones");
   // Con teclado: la flecha cambia la respuesta.
   await rd.focus('input[name="rd-1"][value="3"]');
   await rd.keyboard.press("ArrowRight");
@@ -128,6 +162,30 @@ await pag.close();
   const plataforma = await rd.$$eval("a[href^='https://andrezgmz.github.io/ejecutar-sin-miedo/']", (as) => as.map((a) => `${a.rel}|${a.target}`));
   if (plataforma.length !== 2 || plataforma.some((x) => x !== "noopener|")) falla("estrategia.html", V, `enlaces a la plataforma: ${plataforma.join(", ")}`);
   await rd.close();
+
+  // Celular (390 px): 5 opciones en una fila, solo el número, objetivos de 44 px o más, la escala explicada una vez.
+  // Antes del ajuste del 06-nov la sección medía 4013 px a 390 px.
+  const ANTES_390 = 4013;
+  const cel = await navegador.newPage({ viewport: VISTAS.celular });
+  await cel.goto(BASE + "estrategia.html", { waitUntil: "networkidle" });
+  const m = await cel.evaluate(() => {
+    const cajas = [...document.querySelectorAll(".rd-pregunta")].map((f) => [...f.querySelectorAll(".rd-escala span")].map((s) => s.getBoundingClientRect()));
+    const ley = document.querySelectorAll(".rd-escala-leyenda");
+    return {
+      alto: Math.round(document.getElementById("radar").getBoundingClientRect().height),
+      unaFila: cajas.every((fila) => fila.length === 5 && fila.every((c) => Math.abs(c.top - fila[0].top) < 1)),
+      minimo: Math.floor(Math.min(...cajas.flat().map((c) => Math.min(c.width, c.height)))),
+      textosVisibles: [...document.querySelectorAll(".rd-txt")].filter((t) => t.getClientRects().length).length,
+      leyendas: ley.length, leyenda: ley[0] && ley[0].getClientRects().length ? ley[0].textContent : "",
+    };
+  });
+  console.log(`Demo del Radar a 390 px: antes ${ANTES_390} px, ahora ${m.alto} px.`);
+  if (!(m.alto < ANTES_390)) falla("estrategia.html", "celular", `el demo mide ${m.alto} px, no menos que ${ANTES_390}`);
+  if (!m.unaFila) falla("estrategia.html", "celular", "las 5 opciones no quedan en una fila");
+  if (m.minimo < 44) falla("estrategia.html", "celular", `objetivo táctil de ${m.minimo} px (mínimo 44)`);
+  if (m.textosVisibles) falla("estrategia.html", "celular", `${m.textosVisibles} textos de opción visibles (solo el número)`);
+  if (m.leyendas !== 1 || m.leyenda !== "1 No existe · 2 Hay intentos aislados · 3 Está en marcha · 4 Funciona y se mide · 5 Es referente") falla("estrategia.html", "celular", `escala arriba de las preguntas: «${m.leyenda}»`);
+  await cel.close();
 }
 
 // Reglas de SECURITY.md que se leen en el código: CSP igual en todas las páginas, sin innerHTML ni código en línea.

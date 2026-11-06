@@ -237,24 +237,30 @@ main>.envoltura:last-child{padding-bottom:72px}
 .rd-escala input:focus-visible+span{outline:3px solid var(--lavanda);outline-offset:2px}
 .rd-resultado{position:sticky;top:90px}
 .rd-falta{color:var(--gris-claro)}
+.rd-escala-leyenda{display:none}
+.rd-txt{font-size:inherit}
 .rd-radar{display:block;width:100%;max-width:440px;margin:8px auto 4px}
 .rd-anillo,.rd-eje{fill:none;stroke:rgba(169,174,194,.28);stroke-width:1}
 .rd-area{fill:rgba(47,79,216,.55);stroke:var(--lavanda);stroke-width:2.5;stroke-linejoin:round}
 .rd-punto{fill:var(--lavanda)}
 .rd-rotulo-eje{fill:var(--gris-claro);font-family:var(--sans);font-size:14px}
-.rd-bajo{fill:var(--coral)}
-.rd-rotulo-eje.rd-bajo{font-weight:700}
+.rd-rotulo-eje.rd-bajo{fill:var(--crema);font-weight:700}
+.rd-punto.rd-bajo{fill:var(--tinta);stroke:var(--crema);stroke-width:2}
 .rd-total{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:4px 0 6px}
 .rd-total b{font-size:46px;font-weight:800;line-height:1;color:var(--crema)}
 .rd-total>span:not(.etiqueta){color:var(--gris);font-size:18px}
 .rd-total .etiqueta{align-self:center}
 .rd-resultado .rd-dato{margin:0 0 6px}
 .rd-dato b{color:var(--crema)}
-.rd-riesgo b{color:var(--coral)}
+.rd-riesgo b{color:var(--crema);font-weight:700}
 .rd-resultado .boton{margin-top:12px}
 .rd-resultado .rd-rotulo{font-size:13px;color:var(--gris);margin:18px 0 0;line-height:1.45}
 @media (max-width:1024px){.rd-rejilla{grid-template-columns:1fr}.rd-resultado{position:static}}
 @media (max-width:560px){
-  .rd-escala{grid-template-columns:1fr}
-  .rd-escala span{flex-direction:row;align-items:center;gap:12px}
+  .rd-escala-leyenda{display:block;font-size:13.5px;color:var(--texto-2);background:var(--blanco);border:1px solid var(--linea-2);border-radius:var(--radio);padding:12px 14px;margin:0 0 14px;line-height:1.5}
+  .rd-escala{grid-template-columns:repeat(5,minmax(44px,1fr));gap:6px}
+  .rd-escala span{align-items:center;justify-content:center;min-height:48px;padding:6px}
+  .rd-escala b{font-size:17px}
+  .rd-txt{display:none}
+  .rd-pregunta{padding:16px}
 }
