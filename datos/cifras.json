@@ -1,0 +1,1343 @@
+{
+ "generado": "2026-11-05",
+ "unidades": "Pesos en miles de millones de pesos; porcentajes como fracción (0,388 = 38,8 %).",
+ "referencias": {
+  "inflacion_2025": {
+   "valor": 0.051,
+   "fuente": "DANE, inflación anual 2025"
+  },
+  "inflacion_2023_2025": {
+   "valor": 0.208,
+   "fuente": "DANE, inflación acumulada 2023-2025"
+  }
+ },
+ "series": {
+  "T02": {
+   "titulo": "Las CAC son el 5,3 % de las entidades, pero reúnen el 53,4 % de los asociados",
+   "subtitulo": "Participación por tipo de entidad en el sector vigilado por Supersolidaria, diciembre de 2025",
+   "fuente": "Fuente: Supersolidaria, estados financieros cuentas principales a 31-dic-2025, participación por tipo de entidad · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Participación por tipo de entidad",
+     "columnas": [
+      "Tipo de entidad",
+      "Entidades (entidades)",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)",
+      "% Entidades",
+      "% Activos",
+      "% Asociados"
+     ],
+     "filas": [
+      [
+       "CAC",
+       172,
+       24495,
+       4057842,
+       0.053,
+       0.388,
+       0.534
+      ],
+      [
+       "Otras cooperativas",
+       1541,
+       20135,
+       2061988,
+       0.474,
+       0.319,
+       0.271
+      ],
+      [
+       "Fondos de empleados",
+       1346,
+       16531,
+       1259613,
+       0.414,
+       0.262,
+       0.166
+      ],
+      [
+       "Mutuales",
+       106,
+       466,
+       215567,
+       0.033,
+       0.007,
+       0.028
+      ],
+      [
+       "Otras entidades",
+       86,
+       1470,
+       3761,
+       0.026,
+       0.023,
+       0
+      ]
+     ]
+    },
+    {
+     "nombre": "Tabla para el gráfico (misma información, transpuesta con fórmulas)",
+     "columnas": [
+      "Medida",
+      "CAC",
+      "Otras cooperativas",
+      "Fondos de empleados",
+      "Mutuales",
+      "Otras entidades"
+     ],
+     "filas": [
+      [
+       "Entidades (entidades)",
+       172,
+       1541,
+       1346,
+       106,
+       86
+      ],
+      [
+       "Activos (miles de millones de $)",
+       24495,
+       20135,
+       16531,
+       466,
+       1470
+      ],
+      [
+       "Asociados (personas)",
+       4057842,
+       2061988,
+       1259613,
+       215567,
+       3761
+      ]
+     ]
+    }
+   ]
+  },
+  "T03": {
+   "titulo": "Bogotá, Antioquia y Santander concentran el 70,6 % de los activos de las CAC",
+   "subtitulo": "Activos de las CAC por departamento, diciembre de 2025: 24,5 billones de pesos en total; los tres primeros suman 70,6 %",
+   "fuente": "Fuente: Supersolidaria, cuentas principales dic-2025, 172 CAC con actividad financiera · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Activos de las CAC por departamento",
+     "columnas": [
+      "Departamento",
+      "Número de CAC (entidades)",
+      "Activos (miles de millones de $)",
+      "% de los activos"
+     ],
+     "filas": [
+      [
+       "Bogotá D.C.",
+       33,
+       7033,
+       0.287
+      ],
+      [
+       "Antioquia",
+       49,
+       5626,
+       0.229
+      ],
+      [
+       "Santander",
+       23,
+       4656,
+       0.19
+      ],
+      [
+       "Huila",
+       6,
+       1284,
+       0.052
+      ],
+      [
+       "Norte de Santander",
+       6,
+       1249,
+       0.051
+      ],
+      [
+       "Valle del Cauca",
+       15,
+       1243,
+       0.051
+      ],
+      [
+       "Boyacá",
+       4,
+       579,
+       0.024
+      ],
+      [
+       "Cundinamarca",
+       5,
+       496,
+       0.02
+      ],
+      [
+       "Caldas",
+       7,
+       467,
+       0.019
+      ],
+      [
+       "Tolima",
+       7,
+       437,
+       0.018
+      ],
+      [
+       "Resto del país",
+       23,
+       1446,
+       0.059
+      ]
+     ]
+    }
+   ]
+  },
+  "T04": {
+   "titulo": "Colombia: los activos del sector pasaron de $52,1 BB a $63,1 BB (+21 %) entre 2022 y 2025",
+   "subtitulo": "Activos a diciembre de cada año, $ BB, todas las entidades vigiladas por Supersolidaria, por tipo de entidad",
+   "fuente": "Fuente: Supersolidaria, estados financieros dic-2022, dic-2023, dic-2024 y dic-2025, todas las entidades vigiladas · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Activos por tipo de entidad y año",
+     "columnas": [
+      "Año",
+      "CAC (miles de millones de $)",
+      "Otras cooperativas (miles de millones de $)",
+      "Fondos de empleados (miles de millones de $)",
+      "Mutuales (miles de millones de $)",
+      "Otras entidades (miles de millones de $)",
+      "Total (miles de millones de $)"
+     ],
+     "filas": [
+      [
+       "2022",
+       19151,
+       18249,
+       13057,
+       394,
+       1289,
+       52140
+      ],
+      [
+       "2023",
+       20213,
+       19067,
+       14056,
+       438,
+       1340,
+       55114
+      ],
+      [
+       "2024",
+       22011,
+       20498,
+       15491,
+       695,
+       1408,
+       60103
+      ],
+      [
+       "2025",
+       24495,
+       20135,
+       16531,
+       466,
+       1470,
+       63097
+      ]
+     ]
+    },
+    {
+     "nombre": "Crecimiento 2022-2025 por tipo",
+     "columnas": [
+      "Tipo de entidad",
+      "Activos 2022 (miles de millones de $)",
+      "Activos 2025 (miles de millones de $)",
+      "Crecimiento 2022-2025 (%)"
+     ],
+     "filas": [
+      [
+       "CAC",
+       19151,
+       24495,
+       0.279
+      ],
+      [
+       "Otras cooperativas",
+       18249,
+       20135,
+       0.103
+      ],
+      [
+       "Fondos de empleados",
+       13057,
+       16531,
+       0.266
+      ],
+      [
+       "Mutuales",
+       394,
+       466,
+       0.183
+      ],
+      [
+       "Otras entidades",
+       1289,
+       1470,
+       0.14
+      ]
+     ]
+    }
+   ]
+  },
+  "T05": {
+   "titulo": "Colombia: las CAC tienen el 39 % del activo y el 53 % de los asociados del sector",
+   "subtitulo": "Sector vigilado por Supersolidaria, diciembre de 2025: 3.251 entidades, $63,10 BB en activos, 7,6 millones de asociados",
+   "fuente": "Fuente: Supersolidaria, estados financieros de cuentas principales a 31-dic-2025, balance nacional por tipo de entidad · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Activos por tipo de entidad",
+     "columnas": [
+      "Tipo de entidad",
+      "Activos (miles de millones de $)",
+      "% del activo"
+     ],
+     "filas": [
+      [
+       "CAC",
+       24495,
+       0.388
+      ],
+      [
+       "Otras cooperativas",
+       20135,
+       0.319
+      ],
+      [
+       "Fondos de empleados",
+       16531,
+       0.262
+      ],
+      [
+       "Mutuales",
+       466,
+       0.007
+      ],
+      [
+       "Otras entidades",
+       1470,
+       0.023
+      ]
+     ]
+    },
+    {
+     "nombre": "Asociados por tipo de entidad",
+     "columnas": [
+      "Tipo de entidad",
+      "Asociados (personas)",
+      "% de asociados"
+     ],
+     "filas": [
+      [
+       "CAC",
+       4057842,
+       0.534
+      ],
+      [
+       "Otras cooperativas",
+       2061988,
+       0.271
+      ],
+      [
+       "Fondos de empleados",
+       1259613,
+       0.166
+      ],
+      [
+       "Mutuales",
+       215567,
+       0.028
+      ],
+      [
+       "Otras entidades",
+       3761,
+       0
+      ]
+     ]
+    },
+    {
+     "nombre": "Cómo se financia cada tipo",
+     "columnas": [
+      "Tipo de entidad",
+      "Activos (miles de millones de $)",
+      "Pasivos (miles de millones de $)",
+      "Patrimonio (miles de millones de $)",
+      "Pasivos % del activo",
+      "Patrimonio % del activo"
+     ],
+     "filas": [
+      [
+       "CAC",
+       24495,
+       16230,
+       8265,
+       0.663,
+       0.337
+      ],
+      [
+       "Otras cooperativas",
+       20135,
+       10425,
+       9710,
+       0.518,
+       0.482
+      ],
+      [
+       "Fondos de empleados",
+       16531,
+       11628,
+       4903,
+       0.703,
+       0.297
+      ],
+      [
+       "Mutuales",
+       466,
+       356,
+       110,
+       0.764,
+       0.236
+      ],
+      [
+       "Otras entidades",
+       1470,
+       598,
+       872,
+       0.407,
+       0.593
+      ]
+     ]
+    }
+   ]
+  },
+  "T07": {
+   "titulo": "1.481 de las 1.713 cooperativas del país (86 %) tienen menos de $20.000 millones en activos",
+   "subtitulo": "Cooperativas de todo tipo vigiladas por Supersolidaria, dic-2025. Esas 1.481 suman el 8,3 % del activo cooperativo",
+   "fuente": "Fuente: Supersolidaria, cuentas principales dic-2025, 1.713 cooperativas de todo tipo · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Número de cooperativas por rango de activos",
+     "columnas": [
+      "Rango de activos",
+      "Número de cooperativas (entidades)",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)",
+      "% de cooperativas",
+      "% del activo"
+     ],
+     "filas": [
+      [
+       "Menos de $1.000 millones",
+       801,
+       247.4,
+       138926,
+       0.468,
+       0.006
+      ],
+      [
+       "$1.000 a $5.000 millones",
+       441,
+       1066.6,
+       258878,
+       0.257,
+       0.024
+      ],
+      [
+       "$5.000 a $20.000 millones",
+       239,
+       2399.3,
+       437593,
+       0.14,
+       0.054
+      ],
+      [
+       "$20.000 a $100.000 millones",
+       152,
+       6611,
+       1157595,
+       0.089,
+       0.148
+      ],
+      [
+       "$100.000 a $500.000 millones",
+       66,
+       14125.8,
+       2118235,
+       0.039,
+       0.317
+      ],
+      [
+       "Más de $500.000 millones",
+       14,
+       20180.5,
+       2008603,
+       0.008,
+       0.452
+      ]
+     ]
+    },
+    {
+     "nombre": "Activos por rango de activos",
+     "columnas": [
+      "Rango de activos",
+      "Número de cooperativas (entidades)",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)",
+      "% de cooperativas",
+      "% del activo"
+     ],
+     "filas": [
+      [
+       "Menos de $1.000 millones",
+       801,
+       247.4,
+       138926,
+       0.468,
+       0.006
+      ],
+      [
+       "$1.000 a $5.000 millones",
+       441,
+       1066.6,
+       258878,
+       0.257,
+       0.024
+      ],
+      [
+       "$5.000 a $20.000 millones",
+       239,
+       2399.3,
+       437593,
+       0.14,
+       0.054
+      ],
+      [
+       "$20.000 a $100.000 millones",
+       152,
+       6611,
+       1157595,
+       0.089,
+       0.148
+      ],
+      [
+       "$100.000 a $500.000 millones",
+       66,
+       14125.8,
+       2118235,
+       0.039,
+       0.317
+      ],
+      [
+       "Más de $500.000 millones",
+       14,
+       20180.5,
+       2008603,
+       0.008,
+       0.452
+      ]
+     ]
+    }
+   ]
+  },
+  "T08": {
+   "titulo": "Colombia: 1.346 fondos de empleados con $16,53 BB; 928 (69 %) tienen menos de $5.000 millones",
+   "subtitulo": "Supersolidaria, cuentas principales dic-2025; serie 2022-2025. Fondo mediano: $2.040 millones en activos, 282 asociados, 2 empleados",
+   "fuente": "Fuente: Supersolidaria, estados financieros de cuentas principales dic-2022 a dic-2025, fondos de empleados del país · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Cuántos fondos hay de cada tamaño (activos)",
+     "columnas": [
+      "Rango de activos",
+      "Número de fondos (entidades)",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)"
+     ],
+     "filas": [
+      [
+       "Menos de $1.000 M",
+       448,
+       219,
+       55044
+      ],
+      [
+       "$1.000 a $5.000 M",
+       480,
+       1171,
+       199915
+      ],
+      [
+       "$5.000 a $20.000 M",
+       269,
+       2742,
+       362736
+      ],
+      [
+       "$20.000 a $100.000 M",
+       124,
+       4970,
+       384375
+      ],
+      [
+       "$100.000 a $500.000 M",
+       21,
+       3398,
+       173362
+      ],
+      [
+       "Más de $500.000 M",
+       4,
+       4032,
+       84181
+      ]
+     ]
+    },
+    {
+     "nombre": "Evolución 2022-2025",
+     "columnas": [
+      "Año",
+      "Número de fondos (entidades)",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)"
+     ],
+     "filas": [
+      [
+       "2022",
+       1469,
+       13057,
+       1101954
+      ],
+      [
+       "2023",
+       1445,
+       14056,
+       1150579
+      ],
+      [
+       "2024",
+       1504,
+       15491,
+       1265015
+      ],
+      [
+       "2025",
+       1346,
+       16531,
+       1259613
+      ]
+     ]
+    },
+    {
+     "nombre": "Los diez mayores por activos",
+     "columnas": [
+      "Entidad",
+      "Activos (miles de millones de $)",
+      "Asociados (personas)"
+     ],
+     "filas": [
+      [
+       "Cavipetrol (Ecopetrol, Bogotá)",
+       2293,
+       16951
+      ],
+      [
+       "Promédico (Valle)",
+       641,
+       10452
+      ],
+      [
+       "Presente (Éxito, Antioquia)",
+       582,
+       42192
+      ],
+      [
+       "FEPEP (Grupo EPM, Antioquia)",
+       516,
+       14586
+      ],
+      [
+       "Fondavivienda (Bogotá)",
+       301,
+       10129
+      ],
+      [
+       "FEISA (Antioquia)",
+       282,
+       4932
+      ],
+      [
+       "FOE (BBVA, Bogotá)",
+       201,
+       8584
+      ],
+      [
+       "FEC (Colsubsidio, Bogotá)",
+       195,
+       29250
+      ],
+      [
+       "FODUN (U. Nacional, Bogotá)",
+       194,
+       2898
+      ],
+      [
+       "Adebol (Grupo Bolívar, Bogotá)",
+       182,
+       4573
+      ]
+     ]
+    }
+   ]
+  },
+  "T09": {
+   "titulo": "En Santander, 16,6 % de los adultos usa el sector solidario: tres veces el promedio",
+   "subtitulo": "Adultos con al menos un producto en el sector solidario, % por departamento, diciembre de 2023 (ocho mayores)",
+   "fuente": "Fuente: Banca de las Oportunidades, Reporte de Inclusión Financiera 2023, Recuadro 1, p. 35 (corte dic-2023)",
+   "tablas": [
+    {
+     "nombre": "Adultos con producto solidario por departamento",
+     "columnas": [
+      "Departamento",
+      "Adultos con producto en el sector solidario (%)"
+     ],
+     "filas": [
+      [
+       "Santander",
+       0.166
+      ],
+      [
+       "Huila",
+       0.134
+      ],
+      [
+       "Antioquia",
+       0.109
+      ],
+      [
+       "Guainía",
+       0.107
+      ],
+      [
+       "Norte de Santander",
+       0.095
+      ],
+      [
+       "Guaviare",
+       0.081
+      ],
+      [
+       "Cesar",
+       0.076
+      ],
+      [
+       "Boyacá",
+       0.076
+      ],
+      [
+       "Promedio nacional",
+       0.051
+      ]
+     ]
+    }
+   ]
+  },
+  "T10": {
+   "titulo": "El 93 % de los asociados vive en estratos 1 a 3; en Antioquia, el perfil es más vulnerable",
+   "subtitulo": "Distribución de los asociados, % del total de cada grupo, 2025",
+   "fuente": "Fuente: Supersolidaria, tablero GAD Características socioeconómicas de las entidades de la economía solidaria, año 2025 (consultado el 21-oct-2026)",
+   "tablas": [
+    {
+     "nombre": "Género",
+     "columnas": [
+      "Género",
+      "Sector solidario total (%)",
+      "CAC del país (%)",
+      "CAC de Antioquia (%)"
+     ],
+     "filas": [
+      [
+       "Mujer",
+       0.481,
+       0.48,
+       0.45
+      ],
+      [
+       "Hombre",
+       0.519,
+       0.52,
+       0.55
+      ]
+     ]
+    },
+    {
+     "nombre": "Estrato socioeconómico",
+     "columnas": [
+      "Estrato",
+      "Sector solidario total (%)",
+      "CAC del país (%)",
+      "CAC de Antioquia (%)"
+     ],
+     "filas": [
+      [
+       "Estrato 1",
+       0.215,
+       0.235,
+       0.219
+      ],
+      [
+       "Estrato 2",
+       0.336,
+       0.379,
+       0.369
+      ],
+      [
+       "Estrato 3",
+       0.379,
+       0.326,
+       0.353
+      ],
+      [
+       "Estrato 4",
+       0.053,
+       0.043,
+       0.042
+      ],
+      [
+       "Estrato 5",
+       0.013,
+       0.012,
+       0.013
+      ],
+      [
+       "Estrato 6",
+       0.004,
+       0.005,
+       0.004
+      ]
+     ]
+    },
+    {
+     "nombre": "Nivel educativo",
+     "columnas": [
+      "Nivel educativo",
+      "Sector solidario total (%)",
+      "CAC del país (%)",
+      "CAC de Antioquia (%)"
+     ],
+     "filas": [
+      [
+       "Ninguno",
+       0.158,
+       0.173,
+       0.286
+      ],
+      [
+       "Primaria",
+       0.099,
+       0.139,
+       0.15
+      ],
+      [
+       "Bachillerato",
+       0.271,
+       0.265,
+       0.213
+      ],
+      [
+       "Técnica o tecnológica",
+       0.206,
+       0.164,
+       0.137
+      ],
+      [
+       "Universitaria",
+       0.216,
+       0.199,
+       0.192
+      ],
+      [
+       "Posgrado",
+       0.05,
+       0.06,
+       0.023
+      ]
+     ]
+    },
+    {
+     "nombre": "Ingresos mensuales",
+     "columnas": [
+      "Ingresos mensuales",
+      "Sector solidario total (%)",
+      "CAC del país (%)",
+      "CAC de Antioquia (%)"
+     ],
+     "filas": [
+      [
+       "Sin ingresos",
+       0.144,
+       0.173,
+       0.279
+      ],
+      [
+       "Hasta 1 SMMLV",
+       0.22,
+       0.236,
+       0.222
+      ],
+      [
+       "1 a 4 SMMLV",
+       0.51,
+       0.453,
+       0.384
+      ],
+      [
+       "4 a 8 SMMLV",
+       0.087,
+       0.095,
+       0.075
+      ],
+      [
+       "Más de 8 SMMLV",
+       0.039,
+       0.043,
+       0.04
+      ]
+     ]
+    }
+   ]
+  },
+  "T11": {
+   "titulo": "Los activos de las CAC pasaron de $20,7 BB a $26,0 BB en 32 meses",
+   "subtitulo": "Cuentas principales del balance agregado de las CAC, billones de pesos (BB)",
+   "fuente": "Fuente: Supersolidaria, Totales CAC (dic-2023, dic-2024, dic-2025 y ago-2026)",
+   "tablas": [
+    {
+     "nombre": "Balance agregado de las CAC",
+     "columnas": [
+      "Cuenta",
+      "Dic-23 (miles de millones de $)",
+      "Dic-24 (miles de millones de $)",
+      "Dic-25 (miles de millones de $)",
+      "Ago-26 (miles de millones de $)"
+     ],
+     "filas": [
+      [
+       "Activos",
+       20670,
+       22500,
+       24510,
+       26030
+      ],
+      [
+       "Cartera",
+       16530,
+       17150,
+       18510,
+       19890
+      ],
+      [
+       "Pasivos",
+       13400,
+       14740,
+       16240,
+       17430
+      ],
+      [
+       "Depósitos",
+       11730,
+       13100,
+       14620,
+       15740
+      ],
+      [
+       "Patrimonio",
+       7270,
+       7760,
+       8280,
+       8590
+      ],
+      [
+       "Capital social",
+       4580,
+       4900,
+       5250,
+       5540
+      ]
+     ]
+    }
+   ]
+  },
+  "T12": {
+   "titulo": "El excedente de las CAC se duplicó entre 2023 y 2025",
+   "subtitulo": "Estado de resultados agregado, miles de millones de pesos. Ago-26 acumula ocho meses",
+   "fuente": "Fuente: Supersolidaria, Totales CAC, estado de resultados agregado · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Estado de resultados agregado de las CAC",
+     "columnas": [
+      "Cuenta",
+      "2023 (miles de millones de $)",
+      "2024 (miles de millones de $)",
+      "2025 (miles de millones de $)",
+      "Ago-26 (miles de millones de $)"
+     ],
+     "filas": [
+      [
+       "Ingresos",
+       3336.4,
+       3689.6,
+       3833.9,
+       2749.5
+      ],
+      [
+       "Costos",
+       1116.7,
+       1131.7,
+       1058,
+       768.9
+      ],
+      [
+       "Gastos netos",
+       2037,
+       2253,
+       2374.5,
+       1681.7
+      ],
+      [
+       "Excedente",
+       182.7,
+       304.9,
+       401.4,
+       299
+      ]
+     ]
+    }
+   ]
+  },
+  "T13": {
+   "titulo": "Los depósitos de las CAC crecieron 34,2 % en 32 meses; la cartera, 20,4 %",
+   "subtitulo": "Índice, diciembre de 2023 = 100. Saldos de las CAC vigiladas por Supersolidaria",
+   "fuente": "Fuente: Supersolidaria, Totales CAC (dic-2023, dic-2024, dic-2025, ago-2026)",
+   "tablas": [
+    {
+     "nombre": "Índice dic-2023 = 100",
+     "columnas": [
+      "Corte",
+      "Meses desde dic-2023",
+      "Depósitos",
+      "Activos",
+      "Cartera",
+      "Patrimonio"
+     ],
+     "filas": [
+      [
+       "Dic-23",
+       0,
+       100,
+       100,
+       100,
+       100
+      ],
+      [
+       "Dic-24",
+       12,
+       111.6,
+       108.9,
+       103.8,
+       106.7
+      ],
+      [
+       "Dic-25",
+       24,
+       124.6,
+       118.6,
+       112,
+       113.8
+      ],
+      [
+       "Ago-26",
+       32,
+       134.2,
+       125.9,
+       120.4,
+       118.2
+      ]
+     ]
+    },
+    {
+     "nombre": "Saldos (base del índice)",
+     "columnas": [
+      "Corte",
+      "Meses desde dic-2023",
+      "Depósitos (miles de millones de $)",
+      "Activos (miles de millones de $)",
+      "Cartera (miles de millones de $)",
+      "Patrimonio (miles de millones de $)"
+     ],
+     "filas": [
+      [
+       "Dic-23",
+       0,
+       11730.7,
+       20665.7,
+       16525.7,
+       7270.4
+      ],
+      [
+       "Dic-24",
+       12,
+       13095.6,
+       22501.7,
+       17154.8,
+       7759.1
+      ],
+      [
+       "Dic-25",
+       24,
+       14620.2,
+       24514.2,
+       18509.4,
+       8275.7
+      ],
+      [
+       "Ago-26",
+       32,
+       15738.3,
+       26028,
+       19893.1,
+       8594.5
+      ]
+     ]
+    }
+   ]
+  },
+  "T14": {
+   "titulo": "El excedente pasó de 5,5 % a 10,5 % de los ingresos porque bajaron los costos",
+   "subtitulo": "En qué se van los ingresos de las CAC, año completo",
+   "fuente": "Fuente: Supersolidaria, Totales CAC, ingresos, gastos, costos y excedentes 2023-2025 · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Uso de los ingresos de las CAC",
+     "columnas": [
+      "Año",
+      "Costos (intereses de depósitos y otros) (miles de millones de $)",
+      "Gastos de operación y deterioro (miles de millones de $)",
+      "Excedente (miles de millones de $)",
+      "Ingresos (suma) (miles de millones de $)",
+      "% Costos",
+      "% Gastos",
+      "% Excedente"
+     ],
+     "filas": [
+      [
+       "2023",
+       1116.7,
+       2037,
+       182.7,
+       3336.4,
+       0.335,
+       0.611,
+       0.055
+      ],
+      [
+       "2024",
+       1131.7,
+       2253,
+       304.9,
+       3689.6,
+       0.307,
+       0.611,
+       0.083
+      ],
+      [
+       "2025",
+       1058,
+       2374.5,
+       401.4,
+       3833.9,
+       0.276,
+       0.619,
+       0.105
+      ]
+     ]
+    }
+   ]
+  },
+  "T17": {
+   "titulo": "Todos los plazos del Decreto 0769 vencieron entre enero y octubre de 2026",
+   "subtitulo": "Obligaciones de pagos digitales de las CAC, contadas desde la vigencia del decreto",
+   "fuente": "Fuente: Decreto 0769 de 2025, arts. 2.11.14.4 a 2.11.14.6 y régimen de transición",
+   "tablas": [
+    {
+     "nombre": "Plazos del Decreto 0769 de 2025",
+     "columnas": [
+      "Obligación",
+      "Fecha de vencimiento",
+      "Meses desde la vigencia"
+     ],
+     "filas": [
+      [
+       "Entrada en vigencia del decreto",
+       "2025-07-08",
+       0
+      ],
+      [
+       "Política de transformación digital: plenas",
+       "2026-01-08",
+       6
+      ],
+      [
+       "Instrucciones de seguridad: Supersolidaria",
+       "2026-01-08",
+       6
+      ],
+      [
+       "Política de transformación digital: intermedias",
+       "2026-04-08",
+       9
+      ],
+      [
+       "Política de transformación digital: básicas",
+       "2026-07-08",
+       12
+      ],
+      [
+       "Transferencias entre CAC: plenas e intermedias",
+       "2026-07-08",
+       12
+      ],
+      [
+       "Canal no presencial: plenas e intermedias",
+       "2026-10-08",
+       15
+      ]
+     ]
+    }
+   ]
+  },
+  "T19": {
+   "titulo": "Bre-B: las cooperativas son 172 de las 245 entidades conectadas (70 %)",
+   "subtitulo": "Número de entidades conectadas al sistema de pagos inmediatos del Banco de la República, por tipo y fecha de corte",
+   "fuente": "Fuente: Banco de la República, Bre-B: del diseño a la realidad, balance del primer año (6-oct-2026)",
+   "tablas": [
+    {
+     "nombre": "Entidades conectadas a Bre-B",
+     "columnas": [
+      "Tipo de entidad",
+      "6-oct-25 (entidades)",
+      "31-mar-26 (entidades)",
+      "30-sep-26 (entidades)"
+     ],
+     "filas": [
+      [
+       "Cooperativas",
+       81,
+       167,
+       172
+      ],
+      [
+       "Bancos",
+       26,
+       26,
+       27
+      ],
+      [
+       "Fondos de empleados",
+       7,
+       23,
+       19
+      ],
+      [
+       "CF, SEDPE y otras",
+       14,
+       18,
+       27
+      ]
+     ]
+    }
+   ]
+  },
+  "T37": {
+   "titulo": "En 2025 los depósitos crecieron más que la cartera, en el país y en Antioquia",
+   "subtitulo": "Variación anual de diciembre de 2024 a diciembre de 2025, en porcentaje",
+   "fuente": "Fuente: Supersolidaria, Totales CAC y reportes de Antioquia (dic-2024 y dic-2025); inflación 2025 del DANE · cálculos propios",
+   "tablas": [
+    {
+     "nombre": "Crecimiento 2025: Colombia frente a Antioquia",
+     "columnas": [
+      "Cuenta",
+      "Colombia dic-2024 (miles de millones de $)",
+      "Colombia dic-2025 (miles de millones de $)",
+      "Colombia (172 CAC) (%)",
+      "Antioquia dic-2024 (miles de millones de $)",
+      "Antioquia dic-2025 (miles de millones de $)",
+      "Antioquia (49 CAC) (%)"
+     ],
+     "filas": [
+      [
+       "Activos",
+       22500,
+       24510,
+       0.089,
+       5231,
+       5626,
+       0.076
+      ],
+      [
+       "Cartera",
+       17150,
+       18510,
+       0.079,
+       4087,
+       4329,
+       0.059
+      ],
+      [
+       "Depósitos",
+       13100,
+       14620,
+       0.116,
+       3380,
+       3697,
+       0.094
+      ],
+      [
+       "Patrimonio",
+       7760,
+       8280,
+       0.067,
+       1519,
+       1618,
+       0.065
+      ],
+      [
+       "Excedentes",
+       305,
+       401,
+       0.315,
+       66.5,
+       91.6,
+       0.377
+      ]
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cifras del sector solidario · Katalis Partners</title>
+<meta name="description" content="Tablero del sector solidario colombiano con cifras oficiales de Supersolidaria y el Banco de la República, y una lectura de Katalis para su cooperativa.">
+<meta property="og:title" content="Cifras del sector solidario · Katalis Partners">
+<meta property="og:description" content="Tablero del sector solidario colombiano con cifras oficiales de Supersolidaria y el Banco de la República, y una lectura de Katalis para su cooperativa.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta name="theme-color" content="#161A2E">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/katalis.css">
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="cabecera">
+<nav aria-label="Principal">
+<a class="marca" href="index.html" aria-label="Katalis Partners, inicio"><svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><rect x="10" y="8" width="20" height="84" rx="3" fill="#F7F4EE"/><polygon points="36,48 74,8 94,8 46,58" fill="#9DB4FF"/><polygon points="52,60 64,48 96,92 72,92" fill="#FF8A65"/></svg><span><b>KATALIS</b><small>PARTNERS</small></span></a>
+<button class="menu-boton" aria-expanded="false" aria-controls="menu">Menú</button>
+<div class="menu" id="menu"><a href="estrategia.html">Estrategia</a><a href="salud.html">Salud</a><a href="cifras.html" aria-current=page>Cifras</a><a href="blog/index.html">Blog</a><a href="libro.html">Libro</a><a href="nosotros.html">Nosotros</a><a class="boton boton-claro" href="https://wa.me/573167836311" rel="noopener">Agendar una conversación</a></div>
+</nav>
+</header>
+<main id="contenido">
+<section class="portada">
+<div class="envoltura">
+<div class="fila-etiquetas sube-anim d1"><span class="mono">Cifras · Tablero del sector</span><span class="etiqueta etiqueta-lavanda">Cifras oficiales · corte dic-2025 y ago-2026</span></div>
+<h1 class="sube-anim d2">El sector solidario y las finanzas, en cifras que se pueden <em>leer</em>.</h1>
+<p class="entrada sube-anim d3">Indicadores del sector con su fuente oficial, y una lectura de Katalis sobre qué significan para su cooperativa.</p>
+<p class="nota">Fuentes: Superintendencia de la Economía Solidaria, Banco de la República y Banca de las Oportunidades. Pesos corrientes; BB = billones de pesos.</p>
+</div>
+</section>
+
+<section class="filtros" aria-label="Filtros del tablero">
+<div class="envoltura">
+<div class="pestanas" role="tablist" aria-label="Tema">
+<button role="tab" id="tab-sector" aria-controls="panel-sector" aria-selected="true">Sector solidario</button>
+<button role="tab" id="tab-cac" aria-controls="panel-cac" aria-selected="false">Ahorro y crédito</button>
+<button role="tab" id="tab-pagos" aria-controls="panel-pagos" aria-selected="false">Pagos digitales y norma</button>
+</div>
+<div class="pildoras" id="filtro-tipo" aria-label="Tipo de entidad">
+<button aria-pressed="true" data-tipo="Todas">Todas</button>
+<button aria-pressed="false" data-tipo="CAC">Ahorro y crédito</button>
+<button aria-pressed="false" data-tipo="Otras cooperativas">Otras cooperativas</button>
+<button aria-pressed="false" data-tipo="Fondos de empleados">Fondos de empleados</button>
+<button aria-pressed="false" data-tipo="Mutuales">Mutuales</button>
+</div>
+</div>
+</section>
+
+<div class="envoltura">
+<p id="estado" class="tarjeta baja" role="alert" hidden></p>
+
+<div class="panel seccion" id="panel-sector" role="tabpanel" aria-labelledby="tab-sector">
+<div class="rejilla r4" id="kpi-sector" aria-live="polite"></div>
+<div class="rejilla r-7-5">
+<div class="tarjeta">
+<h3>Activos por tipo de entidad, 2022–2025</h3>
+<span class="mono" id="sector-nota"></span>
+<div class="grafico grafico-alto"><canvas id="g-activos-anio" aria-label="Activos del sector por tipo de entidad y año" role="img"></canvas></div>
+<p class="fuente" id="f-activos-anio"></p>
+</div>
+<div class="tarjeta">
+<h3>Participación en el sector, dic-2025</h3>
+<span class="mono">% del activo y de los asociados</span>
+<div id="b-participacion"></div>
+<p class="fuente" id="f-participacion"></p>
+<h3 class="separa">Pasivos frente al activo</h3>
+<span class="mono">Cuánto del activo se financia con deuda y ahorro</span>
+<div id="b-financia"></div>
+<p class="fuente" id="f-financia"></p>
+</div>
+</div>
+<div class="rejilla r2">
+<div class="tarjeta">
+<h3 id="t-tamano"></h3>
+<span class="mono">Cooperativas por rango de activos, dic-2025</span>
+<div class="grafico"><canvas id="g-tamano" aria-label="Cooperativas por rango de activos" role="img"></canvas></div>
+<p class="fuente" id="f-tamano"></p>
+</div>
+<div class="tarjeta">
+<h3 id="t-inclusion"></h3>
+<span class="mono">Adultos con un producto solidario, dic-2023</span>
+<div id="b-inclusion"></div>
+<p class="fuente" id="f-inclusion"></p>
+</div>
+</div>
+<div class="tarjeta">
+<h3>El 93 % de los asociados del sector vive en estratos 1 a 3.</h3>
+<div class="pildoras" id="perfil-opciones" aria-label="Variable del perfil">
+<button aria-pressed="true" data-tabla="1">Estrato</button>
+<button aria-pressed="false" data-tabla="3">Ingresos</button>
+<button aria-pressed="false" data-tabla="2">Nivel educativo</button>
+</div>
+<div class="grafico"><canvas id="g-perfil" aria-label="Perfil socioeconómico de los asociados" role="img"></canvas></div>
+<p class="fuente" id="f-perfil"></p>
+</div>
+</div>
+
+<div class="panel seccion" id="panel-cac" role="tabpanel" aria-labelledby="tab-cac" hidden>
+<div class="rejilla r4" id="kpi-cac"></div>
+<div class="rejilla r-7-5">
+<div class="tarjeta">
+<h3 id="t-indice"></h3>
+<span class="mono">Índice · dic-2023 = 100</span>
+<div class="grafico grafico-alto"><canvas id="g-indice" aria-label="Crecimiento acumulado de depósitos, cartera, activos y patrimonio" role="img"></canvas></div>
+<p class="fuente" id="f-indice"></p>
+</div>
+<div class="tarjeta">
+<h3 id="t-depto"></h3>
+<span class="mono">% de los activos de las CAC · (n.º de CAC)</span>
+<div id="b-depto"></div>
+<p class="fuente" id="f-depto"></p>
+</div>
+</div>
+<div class="rejilla r-7-5">
+<div class="tarjeta">
+<h3>Indicadores clave de las CAC, 2025</h3>
+<div class="tabla-desliza">
+<table class="tabla">
+<thead><tr><th scope="col">Cuenta</th><th scope="col" class="num">Dic-2024</th><th scope="col" class="num">Dic-2025</th><th scope="col" class="num">Variación</th><th scope="col">Lectura</th></tr></thead>
+<tbody id="tabla-cac"></tbody>
+</table>
+</div>
+<p class="fuente" id="f-tabla-cac"></p>
+</div>
+<div class="tarjeta tarjeta-tinta">
+<span class="mono">Lectura Katalis</span>
+<h3>El ahorro llega más rápido de lo que se presta: antes de comprar tecnología, decida a qué servicio va esa liquidez.</h3>
+<p>Leemos qué significa esta brecha para su cooperativa y qué preguntas llevar al consejo.</p>
+<a class="boton boton-lavanda" href="blog/el-ahorro-llega-mas-rapido.html">Leer el análisis <span class="flecha">→</span></a>
+</div>
+</div>
+<div class="tarjeta">
+<h3 id="t-ingresos"></h3>
+<span class="mono">En qué se van los ingresos de las CAC</span>
+<div class="grafico"><canvas id="g-ingresos" aria-label="Distribución de los ingresos de las CAC por año" role="img"></canvas></div>
+<p class="fuente" id="f-ingresos"></p>
+</div>
+</div>
+
+<div class="panel seccion" id="panel-pagos" role="tabpanel" aria-labelledby="tab-pagos" hidden>
+<div class="rejilla r4" id="kpi-pagos"></div>
+<div class="rejilla r2">
+<div class="tarjeta">
+<h3 id="t-breb"></h3>
+<span class="mono">Entidades conectadas por corte</span>
+<div class="grafico grafico-alto"><canvas id="g-breb" aria-label="Entidades conectadas a Bre-B por tipo y corte" role="img"></canvas></div>
+<p class="fuente" id="f-breb"></p>
+</div>
+<div class="tarjeta">
+<h3>Plazos del Decreto 769 de 2025</h3>
+<span class="mono">Calculados hoy, desde la vigencia</span>
+<ul class="linea-tiempo" id="lista-769"></ul>
+<p class="fuente">Fuente: <a href="https://www1.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=260697" rel="noopener">Decreto 769 de 2025</a>, arts. 2.11.14.4 a 2.11.14.6, 2 (régimen de transición), 3 y 4. Publicado en el Diario Oficial 53.175 del 8 de julio de 2025; rige desde el día siguiente. Finanzas abiertas: <a href="https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=275576" rel="noopener">Decreto 368 de 2026</a>, art. 2.35.8.2.3.</p>
+</div>
+</div>
+</div>
+</div>
+
+<section class="seccion" aria-labelledby="metodo">
+<div class="envoltura">
+<span class="mono">Metodología</span>
+<h2 id="metodo">Cómo llegan las cifras a este tablero</h2>
+<p class="bajada">Ningún número de esta página se escribe a mano. Cada dato sale de un reporte oficial, se valida y se publica con su fuente y su fecha de corte.</p>
+<div class="flujo">
+<div class="paso"><h4>Fuente oficial</h4><p>Reportes de Supersolidaria, Banco de la República y Banca de las Oportunidades.</p></div>
+<div class="paso"><h4>Validación</h4><p>Cuadre de totales contra el reporte original y registro de diferencias de fuente.</p></div>
+<div class="paso"><h4>Conversión</h4><p>Un programa copia los datos validados a un archivo de cifras, sin recalcularlos.</p></div>
+<div class="paso"><h4>Publicación</h4><p>Cada actualización queda registrada en el historial del sitio, con fecha y autor.</p></div>
+<div class="paso"><h4>Lectura Katalis</h4><p>Publicamos en el blog qué significan los cambios para una cooperativa.</p></div>
+</div>
+<p class="fuente" id="generado"></p>
+</div>
+</section>
+
+<div class="envoltura">
+<div class="llamado">
+<div>
+<span class="mono">Katalis · Datos</span>
+<h2>Este tablero, con los datos de su cooperativa.</h2>
+<p>Comparamos sus indicadores con el sector y le entregamos el tablero que su consejo va a usar cada mes.</p>
+</div>
+<a class="boton boton-tinta" href="https://wa.me/573167836311" rel="noopener">Solicitar un diagnóstico <span class="flecha">→</span></a>
+</div>
+</div>
+
+</main>
+<footer class="pie">
+<div class="envoltura">
+<div>
+<a class="marca" href="index.html"><svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><rect x="10" y="8" width="20" height="84" rx="3" fill="#F7F4EE"/><polygon points="36,48 74,8 94,8 46,58" fill="#9DB4FF"/><polygon points="52,60 64,48 96,92 72,92" fill="#FF8A65"/></svg><span><b>KATALIS</b><small>PARTNERS</small></span></a>
+<p class="pie-lema">Bajamos la barrera del cambio. Estrategia para organizaciones · Ciencia del cuidado para la salud.</p>
+</div>
+<div><h4>Sitio</h4><ul><li><a href="estrategia.html">Estrategia</a></li><li><a href="salud.html">Salud</a></li><li><a href="cifras.html">Cifras</a></li><li><a href="blog/index.html">Blog</a></li><li><a href="libro.html">Libro</a></li><li><a href="nosotros.html">Nosotros</a></li></ul></div>
+<div><h4>Contacto</h4><ul>
+<li><a href="https://wa.me/573167836311" rel="noopener">WhatsApp</a></li>
+<li><a href="mailto:andrezgmz@outlook.com">Correo</a></li>
+<li><a href="https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo" rel="noopener">LinkedIn</a></li>
+</ul></div>
+<div class="legal"><span>Gómez Hernández Consulting S.A.S. (Katalis Partners) · NIT 902.121.376-5 · Bogotá D.C.</span><a href="privacidad.html">Privacidad y datos</a></div>
+</div>
+</footer>
+<script src="assets/js/sitio.js"></script>
+<script src="assets/vendor/chart-4.4.1.umd.min.js"></script><script src="assets/js/cifras.js"></script>
+</body>
+</html>
