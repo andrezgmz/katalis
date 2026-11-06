@@ -17,6 +17,8 @@ WHATSAPP = "573167836311"
 CORREO = "andrezgmz@outlook.com"
 LINKEDIN = "https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo"
 DOMINIO = "https://katalispartners.com.co"
+# La plataforma Ejecutar sin Miedo (la app no se muda: hay QR y enlaces impresos). Si pasa a un subdominio, se cambia solo aquí.
+PLATAFORMA = "https://andrezgmz.github.io/ejecutar-sin-miedo/"
 LIBRO_HOTMART = ""  # Pegue aquí el enlace de Hotmart cuando el libro salga a la venta.
 
 
@@ -63,7 +65,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
 <nav aria-label="Principal">
 <a class="marca" href="{p}index.html" aria-label="Katalis Partners, inicio">{LOGO}<span><b>KATALIS</b><small>PARTNERS</small></span></a>
 <button class="menu-boton" aria-expanded="false" aria-controls="menu">Menú</button>
-<div class="menu" id="menu">{items}<a class="boton boton-claro" href="{WA}" rel="noopener">Agendar una conversación</a></div>
+<div class="menu" id="menu">{items}<a class="menu-plataforma" href="{PLATAFORMA}" rel="noopener">Plataforma</a><a class="boton boton-claro" href="{WA}" rel="noopener">Agendar una conversación</a></div>
 </nav>
 </header>
 <main id="contenido">
@@ -93,7 +95,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
 
 
 def main():
-    reemplazos = {"{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{CORREO}}": "mailto:" + CORREO,
+    reemplazos = {"{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{CORREO}}": "mailto:" + CORREO, "{{PLATAFORMA}}": PLATAFORMA,
                   "{{LIBRO}}": LIBRO_HOTMART or "mailto:" + CORREO + "?subject=Av%C3%ADsame%20cuando%20salga%20Ejecutar%20sin%20Miedo",
                   "{{LIBRO_TEXTO}}": "Comprar en Hotmart" if LIBRO_HOTMART else "Avísame cuando salga"}
     hechas = []
