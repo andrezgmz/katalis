@@ -1,6 +1,6 @@
 # Seguridad
 
-Para reportar una vulnerabilidad escriba a andrezgmz@outlook.com con el asunto «Seguridad web Katalis». No abra un issue público. Respondemos en un máximo de 5 días hábiles.
+Para reportar una vulnerabilidad escriba a hola@katalispartners.com.co con el asunto «Seguridad web Katalis». No abra un issue público. Respondemos en un máximo de 5 días hábiles.
 
 ## Controles del sitio
 

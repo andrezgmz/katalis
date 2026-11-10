@@ -14,7 +14,7 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 
 # Datos que cambian
 WHATSAPP = "573167836311"
-CORREO = "andrezgmz@outlook.com"
+CORREO = "hola@katalispartners.com.co"
 LINKEDIN = "https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo"
 DOMINIO = "https://katalispartners.com.co"
 # La plataforma Ejecutar sin Miedo (la app no se muda: hay QR y enlaces impresos). Si pasa a un subdominio, se cambia solo aquí.
