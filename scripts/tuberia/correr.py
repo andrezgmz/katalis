@@ -50,7 +50,8 @@ def correr_fuente(fuente, momento, rechazados):
         escribir_json(INDICADORES / f"{fuente}.json", {**indicador, "crudo": archivo})
         filas = (len(limpio.get("serie", [])) or len(limpio.get("indices", {})) or limpio.get("filas")
                  or len(limpio.get("cambios", [])))
-        linea.update(resultado="ok", filas=filas, crudo=archivo, crudo_nuevo=nuevo)
+        linea.update(resultado="ok", filas=filas, crudo=archivo,
+                     crudo_estado="nuevo" if nuevo else "sin cambios")
     except (ErrorFuente, ErrorValidacion) as e:
         linea.update(resultado="falla", error=f"{type(e).__name__}: {e}")
     except Exception as e:  # un error inesperado en una fuente no tumba las demás
@@ -74,7 +75,8 @@ def main():
         registrar(linea)
         lineas.append(linea)
         estado = "OK   " if linea["resultado"] == "ok" else "FALLA"
-        print(f"{estado} {fuente:12} {linea.get('filas', '')!s:>6} {linea.get('error', linea.get('crudo', ''))}")
+        detalle = linea.get("error") or f"{linea['crudo_estado']}: {linea['crudo']}"
+        print(f"{estado} {fuente:12} {linea.get('filas', '')!s:>6} {detalle}")
 
     exitos = {l["fuente"]: l["resultado"] == "ok" for l in lineas}
     paquete = empaquetar(exitos, momento)

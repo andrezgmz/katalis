@@ -94,19 +94,26 @@ def soql(recurso, **parametros):
 def guardar_crudo(fuente, datos: bytes, extension, meta, momento):
     """Guarda la respuesta tal cual en datos/crudo/<fuente>/<AAAA-MM-DD>/.
 
-    Si es idéntica (mismo sha256) a la última guardada, no la duplica.
+    Solo crea una carpeta nueva si el sha256 cambió frente a la última respuesta guardada
+    (la de hora más reciente); si es igual, no copia nada y quien llama anota «sin cambios».
+    Nunca sobrescribe: si ya hay una carpeta de ese día, usa <fecha>-2, <fecha>-3…
     Las respuestas grandes se comprimen con gzip: al descomprimir son los mismos bytes.
-    Devuelve la ruta relativa del archivo, o la del último idéntico.
+    Devuelve (ruta relativa del archivo vigente, True si se guardó uno nuevo).
     """
     huella = sha256(datos)
     carpeta_fuente = CRUDO / fuente
-    previas = sorted(carpeta_fuente.glob("*/consulta.json")) if carpeta_fuente.exists() else []
+    previas = [json.loads(p.read_text(encoding="utf-8")) for p in carpeta_fuente.glob("*/consulta.json")] \
+        if carpeta_fuente.exists() else []
     if previas:
-        anterior = json.loads(previas[-1].read_text(encoding="utf-8"))
+        anterior = max(previas, key=lambda c: c.get("hora_utc", ""))
         if anterior.get("sha256") == huella:
             return anterior["archivo"], False
-    carpeta = carpeta_fuente / hoy_bogota(momento).isoformat()
-    carpeta.mkdir(parents=True, exist_ok=True)
+    dia = hoy_bogota(momento).isoformat()
+    carpeta, n = carpeta_fuente / dia, 1
+    while carpeta.exists():
+        n += 1
+        carpeta = carpeta_fuente / f"{dia}-{n}"
+    carpeta.mkdir(parents=True)
     nombre = f"respuesta.{extension}"
     if len(datos) > 200_000:
         nombre += ".gz"

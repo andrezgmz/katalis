@@ -217,5 +217,44 @@ class PruebaCarteraSFC(unittest.TestCase):
             validar.cartera_sfc(cartera_json(cortes=("2026-08-31", "2026-07-31")), {}, HOY)
 
 
+class PruebaCapaCruda(unittest.TestCase):
+    """Capa cruda: carpeta nueva solo si cambia el sha256; nunca sobrescribe."""
+
+    def setUp(self):
+        import tempfile
+        import comun
+        self.comun = comun
+        self.tmp = tempfile.TemporaryDirectory()
+        self.antes = (comun.RAIZ, comun.CRUDO)
+        comun.RAIZ = pathlib.Path(self.tmp.name)
+        comun.CRUDO = comun.RAIZ / "datos" / "crudo"
+
+    def tearDown(self):
+        self.comun.RAIZ, self.comun.CRUDO = self.antes
+        self.tmp.cleanup()
+
+    def guardar(self, datos, hora):
+        momento = dt.datetime.fromisoformat(hora)
+        return self.comun.guardar_crudo("trm", datos, "json", {"hora_utc": hora}, momento)
+
+    def test_sin_cambios_no_duplica(self):
+        a, nuevo = self.guardar(b'[{"v":1}]', "2026-11-12T16:00:00+00:00")
+        self.assertTrue(nuevo)
+        b, nuevo = self.guardar(b'[{"v":1}]', "2026-11-13T16:00:00+00:00")   # otro día, misma respuesta
+        self.assertEqual((b, nuevo), (a, False))
+        self.assertEqual(len(list(self.comun.CRUDO.glob("trm/*"))), 1)
+
+    def test_cambio_el_mismo_dia_no_sobrescribe(self):
+        a, _ = self.guardar(b'[{"v":1}]', "2026-11-12T16:00:00+00:00")
+        b, nuevo = self.guardar(b'[{"v":2}]', "2026-11-12T18:00:00+00:00")
+        self.assertTrue(nuevo)
+        self.assertTrue(b.startswith("datos/crudo/trm/2026-11-12-2/"))
+        self.assertEqual((self.comun.RAIZ / a).read_bytes(), b'[{"v":1}]')   # la primera sigue intacta
+        # La comparación es contra la más reciente por hora, no por nombre de carpeta.
+        c, nuevo = self.guardar(b'[{"v":1}]', "2026-11-12T20:00:00+00:00")
+        self.assertTrue(nuevo)
+        self.assertTrue(c.startswith("datos/crudo/trm/2026-11-12-3/"))
+
+
 if __name__ == "__main__":
     unittest.main()

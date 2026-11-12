@@ -1,7 +1,7 @@
 # Tubería de datos de Katalis Cifras (Fase 0: Pulso macro).
 # extraer → validar → calcular → empaquetar → construir el sitio → verificar.
 #
-# Modo PRUEBA (cualquier rama distinta de main): no hace commit ni abre issues;
+# Modo PRUEBA (a mano desde una rama distinta de main): no hace commit ni abre issues;
 #   sube el resultado como artifact para revisarlo.
 # Modo PUBLICACIÓN (main: programado o a mano): si las pruebas pasan, hace commit
 #   «datos: corte AAAA-MM-DD» a main con lo que sí validó, y abre o actualiza un issue
@@ -12,8 +12,6 @@ on:
   schedule:
     - cron: "17 11 * * *"   # 6:17 a. m. en Bogotá
   workflow_dispatch:
-  push:
-    branches: [fase0-tuberia]   # modo prueba: cada push a la rama es una ejecución de evidencia
 
 permissions:
   contents: write

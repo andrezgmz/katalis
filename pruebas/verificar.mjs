@@ -8,6 +8,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const TIPOS = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
@@ -229,6 +230,16 @@ for (const p of PAGINAS) {
       const marcado = item.includes('data-desactualizado="true"') && item.includes(">desactualizado</span>");
       if (viejo !== marcado) falla(p, "pulso", `${clave}: «desactualizado» = ${marcado}, la regla dice ${viejo}`);
     }
+  }
+}
+
+// Archivos en git: ningún .xlsx fuera de datos/crudo/ (ahí solo van respuestas públicas tal cual, p. ej. el anexo
+// del DANE) y nada de datos/fuente/ (el Excel privado de trabajo). Regla del 12-nov-2026.
+{
+  const enGit = execFileSync("git", ["ls-files"], { cwd: RAIZ, encoding: "utf8" }).split("\n").filter(Boolean);
+  for (const f of enGit) {
+    if (/\.xlsx?$/i.test(f) && !f.startsWith("datos/crudo/")) falla(f, "git", "Excel fuera de datos/crudo/");
+    if (f.startsWith("datos/fuente/")) falla(f, "git", "archivo de datos/fuente/ en git (es privado)");
   }
 }
 

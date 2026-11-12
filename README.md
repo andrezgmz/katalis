@@ -64,8 +64,17 @@ datos/registro.jsonl: una línea por fuente y ejecución (URL, consulta, hora UT
 - **Pruebas de los validadores:** `python -m unittest discover -s pruebas -p "test_*.py"`.
 - **Si una fuente falla:** no avanza, las demás siguen y la web conserva su último valor bueno. Si un dato pasa del plazo (TRM 7 días; tasa del Emisor 45 días sin consulta exitosa; IPC 45 días desde su publicación), la franja lo marca como «desactualizado».
 - **Automático:** `.github/workflows/datos.yml` corre todos los días a las 6:17 a. m. de Bogotá (11:17 UTC) y también a mano (`workflow_dispatch`).
-  - En `main` (modo publicación): si todo pasa, hace commit «datos: corte AAAA-MM-DD» y abre o actualiza un issue «Falla en la tubería: <fuente>» por cada fuente que falló. Los issues tienen que estar activados en el repositorio.
-  - En cualquier otra rama (modo prueba): no hace commit ni abre issues; deja el resultado como artifact.
+  - En `main` (modo publicación): si todo pasa, hace commit «datos: corte AAAA-MM-DD» y abre o actualiza un issue «Falla en la tubería: <fuente>» por cada fuente que falló.
+  - Lanzado a mano desde otra rama (modo prueba): no hace commit ni abre issues; deja el resultado como artifact.
+- **Cómo llega el aviso de una falla:** hoy los issues del repositorio están desactivados; si se activan o no, lo decide Andrés. Mientras sigan así:
+  - el aviso es el **correo que GitHub manda cuando una ejecución termina en rojo**. La tubería termina en rojo si una fuente falla o si una prueba no pasa;
+  - el intento de abrir el issue queda como advertencia dentro de la ejecución;
+  - el detalle está en el resumen de la ejecución y en su artifact.
+
+  Si se activan los issues, el mismo workflow empieza a abrirlos sin cambiar nada.
+- **Capa cruda sin duplicados:** se guarda una carpeta nueva en `datos/crudo/<fuente>/<fecha>/` solo si la respuesta cambió (otro `sha256`). Si es igual, solo se anota «sin cambios» en `registro.jsonl`. Nunca se sobrescribe: un segundo cambio el mismo día va a `<fecha>-2`.
+- **Excel en git:** ningún `.xlsx` fuera de `datos/crudo/`. Ahí solo van respuestas públicas tal cual, como el anexo del IPC del DANE. El Excel privado de `datos/fuente/` sigue ignorado. `pruebas/verificar.mjs` revisa las dos cosas.
+- **Pendiente para la Fase 1:** pasar la tasa del Emisor al servicio SDMX documentado del Banco de la República (versión nueva) y dejar el servicio interno de suameca solo como respaldo si SDMX falla 3 días seguidos.
 
 **Ojo con la protección de `main`:** el robot hace push directo a `main` con el `GITHUB_TOKEN`. Hoy se puede porque la protección solo bloquea `--force` y el borrado. Si después se exigen PR o revisiones en `main`, el robot necesitará una de dos cosas:
 - una excepción para GitHub Actions en la regla de protección;
