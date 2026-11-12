@@ -1,0 +1,131 @@
+# Tubería de datos de Katalis Cifras (Fase 0: Pulso macro).
+# extraer → validar → calcular → empaquetar → construir el sitio → verificar.
+#
+# Modo PRUEBA (cualquier rama distinta de main): no hace commit ni abre issues;
+#   sube el resultado como artifact para revisarlo.
+# Modo PUBLICACIÓN (main: programado o a mano): si las pruebas pasan, hace commit
+#   «datos: corte AAAA-MM-DD» a main con lo que sí validó, y abre o actualiza un issue
+#   «Falla en la tubería: <fuente>» por cada fuente que falló. Ver README («Tubería de datos»).
+name: datos
+
+on:
+  schedule:
+    - cron: "17 11 * * *"   # 6:17 a. m. en Bogotá
+  workflow_dispatch:
+  push:
+    branches: [fase0-tuberia]   # modo prueba: cada push a la rama es una ejecución de evidencia
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: datos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tuberia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      MODO: ${{ github.ref == 'refs/heads/main' && 'publicacion' || 'prueba' }}
+    steps:
+      - name: Preparar rutas temporales
+        run: echo "RESUMEN=$RUNNER_TEMP/resumen.json" >> "$GITHUB_ENV"
+
+      - name: Traer el repositorio
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Pruebas unitarias de la tubería
+        run: python3 -m unittest discover -s pruebas -p "test_*.py" -v
+
+      - name: Tubería (extraer, validar, calcular, empaquetar)
+        run: |
+          python3 --version
+          python3 scripts/tuberia/correr.py --modo "$MODO" --resumen "$RESUMEN" --rechazados "$RUNNER_TEMP/rechazados"
+          echo "### Tubería de datos · modo $MODO" >> "$GITHUB_STEP_SUMMARY"
+          python3 -c "import json,sys; r=json.load(open(sys.argv[1],encoding='utf-8')); [print(f'- {k}: {v.get(\"valor\")}') for k,v in r['macro'].items()]; print(f'- fallas: {len(r[\"fallas\"])}')" "$RESUMEN" >> "$GITHUB_STEP_SUMMARY"
+          tail -n 4 datos/registro.jsonl
+
+      - name: Construir el sitio
+        run: python3 scripts/construir_sitio.py
+
+      - name: Instalar Playwright (fuera del repositorio)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y > /dev/null
+          npm i --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+          ln -s "$RUNNER_TEMP/pw/node_modules" "$GITHUB_WORKSPACE/node_modules"
+
+      - name: Verificar el sitio
+        run: node pruebas/verificar.mjs
+
+      - name: Guardar el resultado (artifact)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tuberia-${{ env.MODO }}-${{ github.run_id }}
+          retention-days: 30
+          path: |
+            datos/registro.jsonl
+            datos/web/
+            datos/indicadores/
+            datos/limpio/
+            datos/crudo/
+            ${{ runner.temp }}/resumen.json
+            ${{ runner.temp }}/rechazados/
+
+      - name: Publicar el corte en main
+        if: env.MODO == 'publicacion'
+        run: |
+          git config user.name "katalis-datos[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos/ ./*.html blog/*.html sitemap.xml
+          if git diff --cached --quiet; then echo "Sin cambios que publicar."; exit 0; fi
+          corte=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1],encoding='utf-8'))['corte'])" "$RESUMEN")
+          git commit -m "datos: corte $corte"
+          git push origin HEAD:main
+
+      - name: Avisar fallas con un issue
+        if: always() && env.MODO == 'publicacion'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RESULTADO_PASOS: ${{ job.status }}
+        run: |
+          avisar () {
+            titulo="$1"; cuerpo="$2"
+            numero=$(gh issue list --state open --search "\"$titulo\" in:title" --json number,title \
+                      --jq ".[] | select(.title == \"$titulo\") | .number" 2>/dev/null | head -1) || numero=""
+            if [ -n "$numero" ]; then
+              gh issue comment "$numero" --body "$cuerpo" || echo "::warning::No se pudo comentar el issue $numero"
+            else
+              gh issue create --title "$titulo" --body "$cuerpo" || echo "::warning::No se pudo abrir el issue «$titulo» (¿issues desactivados en el repositorio?)"
+            fi
+          }
+          if [ -f "$RESUMEN" ]; then
+            python3 - "$RESUMEN" > "$RUNNER_TEMP/avisos.tsv" <<'PY'
+          import json, sys
+          r = json.load(open(sys.argv[1], encoding="utf-8"))
+          for f in r["fallas"]:
+              print(f"Falla en la tubería: {f['fuente']}\t{f['error']}")
+          for a in r["avisos"]:
+              print(f"{a['titulo']}\t{a['detalle']}")
+          PY
+            while IFS=$'\t' read -r titulo detalle; do
+              avisar "$titulo" "$detalle"$'\n\n'"Ejecución: $EJECUCION"$'\n'"La web conserva el último valor bueno de esa fuente."
+            done < "$RUNNER_TEMP/avisos.tsv"
+          else
+            avisar "Falla en la tubería: ejecución" "La tubería no llegó a escribir su resumen."$'\n\n'"Ejecución: $EJECUCION"
+          fi
+          if [ "$RESULTADO_PASOS" != "success" ]; then
+            avisar "Falla en la tubería: pruebas o publicación" "Falló un paso (pruebas unitarias, construir, verificar o publicar). No se publicó el corte."$'\n\n'"Ejecución: $EJECUCION"
+          fi
+
+      - name: Terminar en rojo si alguna fuente falló
+        if: always()
+        run: |
+          python3 -c "import json,sys; r=json.load(open(sys.argv[1],encoding='utf-8')); f=r['fallas']; [print('::error::'+x['fuente']+': '+x['error']) for x in f]; sys.exit(1 if f else 0)" "$RESUMEN"

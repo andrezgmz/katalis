@@ -1,0 +1,8 @@
+{
+ "fuente": "cartera_sfc",
+ "corte": "2026-08-31",
+ "filas": 630,
+ "total_billones": 811.666,
+ "bancos": 30,
+ "crudo": "datos/crudo/cartera_sfc/2026-11-12/respuesta.json.gz"
+}

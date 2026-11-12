@@ -264,3 +264,16 @@ main>.envoltura:last-child{padding-bottom:72px}
   .rd-txt{display:none}
   .rd-pregunta{padding:16px}
 }
+
+/* Pulso macro: franja de cifras oficiales bajo el encabezado (todas las páginas).
+   Neutra (sin Señal ni Pulso) para que sirva igual en Estrategia y en Salud. */
+.pulso{background:var(--tinta-2);border-bottom:1px solid rgba(169,174,194,.14);color:var(--gris-claro);font-size:13px;line-height:1.4}
+.pulso-fila{display:flex;flex-wrap:wrap;align-items:center;gap:4px 26px;padding-top:7px;padding-bottom:7px}
+.pulso-item{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:0 6px}
+.pulso-nombre{color:var(--gris)}
+.pulso-valor{color:var(--crema);font-weight:700;font-variant-numeric:tabular-nums}
+.pulso-fecha{color:var(--gris)}
+.pulso-fuente{color:var(--crema);text-decoration:underline;text-decoration-color:rgba(247,244,238,.45);text-underline-offset:3px}
+.pulso-fuente:hover{color:var(--crema);text-decoration-color:var(--crema)}
+.pulso-viejo{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crema);border:1px solid rgba(247,244,238,.5);border-radius:999px;padding:1px 7px}
+@media (max-width:560px){.pulso{font-size:12px}.pulso-fila{gap:3px 16px;padding-top:6px;padding-bottom:6px}}

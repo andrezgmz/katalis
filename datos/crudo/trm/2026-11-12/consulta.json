@@ -1,0 +1,14 @@
+{
+ "url": "https://www.datos.gov.co/resource/32sa-8pi3.json?%24where=vigenciadesde%20%3E%3D%20%272026-09-28T00%3A00%3A00%27&%24order=vigenciadesde%20DESC&%24limit=100",
+ "hora_utc": "2026-11-12T16:35:24+00:00",
+ "encabezados": {
+  "Date": "Thu, 12 Nov 2026 16:35:23 GMT",
+  "Content-Type": "application/json;charset=utf-8",
+  "ETag": "W/\"Z29sZi41OTEwXzNfMTAzMDZlcHJxUHJrMmVEYVRIY1ljcGkzNWhRY2ZYNUU---gzioGD-e29B1F_GyztIiRHMK3WNCIDg--gzip--gzip\"",
+  "Last-Modified": "Tue, 10 Nov 2026 23:05:26 GMT"
+ },
+ "consulta": "$where=vigenciadesde >= '2026-09-28T00:00:00'&$order=vigenciadesde DESC&$limit=100",
+ "sha256": "9762af9094d0da8357d0e1899f5802a58499e0e426bc8ea6c50c49f51bec17ff",
+ "bytes": 3601,
+ "archivo": "datos/crudo/trm/2026-11-12/respuesta.json"
+}

@@ -1,0 +1,15 @@
+{
+ "url": "https://www.datos.gov.co/resource/rvii-eis8.json?%24where=fecha_corte%20%3D%20%272026-08-31T00%3A00%3A00.000%27%20AND%20renglon%20%3D%20%275%27&%24order=tipo_entidad%2C%20codigo_entidad%2C%20unicap&%24limit=10000",
+ "hora_utc": "2026-11-12T16:35:33+00:00",
+ "encabezados": {
+  "Date": "Thu, 12 Nov 2026 16:35:30 GMT",
+  "Content-Type": "application/json;charset=utf-8",
+  "ETag": "W/\"aW5kaWEuNDgxN18xXzk2SWdBeGtZSlNUUG9TR3RHSkYtRnM0TU1tWUZB---gzip9AzqsyMHK0oOKcQ9_doFe8hpgOY--gzip--gzip\"",
+  "Last-Modified": "Fri, 23 Oct 2026 14:57:36 GMT"
+ },
+ "consulta": "$where=fecha_corte = '2026-08-31T00:00:00.000' AND renglon = '5'&$order=tipo_entidad, codigo_entidad, unicap&$limit=10000",
+ "consulta_corte": "$select=max(fecha_corte) as ultimo",
+ "sha256": "223ddff428f529c3381164b12429c8565eaa46ae09d273f960e79c59e44ef304",
+ "bytes": 690680,
+ "archivo": "datos/crudo/cartera_sfc/2026-11-12/respuesta.json.gz"
+}

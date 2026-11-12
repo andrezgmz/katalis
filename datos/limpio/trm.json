@@ -1,0 +1,156 @@
+{
+ "fuente": "trm",
+ "serie": [
+  {
+   "vigencia_desde": "2026-09-29",
+   "vigencia_hasta": "2026-09-29",
+   "valor": 3349.63
+  },
+  {
+   "vigencia_desde": "2026-09-30",
+   "vigencia_hasta": "2026-09-30",
+   "valor": 3341.23
+  },
+  {
+   "vigencia_desde": "2026-10-01",
+   "vigencia_hasta": "2026-10-01",
+   "valor": 3312.84
+  },
+  {
+   "vigencia_desde": "2026-10-02",
+   "vigencia_hasta": "2026-10-02",
+   "valor": 3307.73
+  },
+  {
+   "vigencia_desde": "2026-10-03",
+   "vigencia_hasta": "2026-10-05",
+   "valor": 3273.49
+  },
+  {
+   "vigencia_desde": "2026-10-06",
+   "vigencia_hasta": "2026-10-06",
+   "valor": 3209.78
+  },
+  {
+   "vigencia_desde": "2026-10-07",
+   "vigencia_hasta": "2026-10-07",
+   "valor": 3216.01
+  },
+  {
+   "vigencia_desde": "2026-10-08",
+   "vigencia_hasta": "2026-10-08",
+   "valor": 3238.88
+  },
+  {
+   "vigencia_desde": "2026-10-09",
+   "vigencia_hasta": "2026-10-09",
+   "valor": 3218.75
+  },
+  {
+   "vigencia_desde": "2026-10-10",
+   "vigencia_hasta": "2026-10-13",
+   "valor": 3194.44
+  },
+  {
+   "vigencia_desde": "2026-10-14",
+   "vigencia_hasta": "2026-10-14",
+   "valor": 3181.74
+  },
+  {
+   "vigencia_desde": "2026-10-15",
+   "vigencia_hasta": "2026-10-15",
+   "valor": 3197.65
+  },
+  {
+   "vigencia_desde": "2026-10-16",
+   "vigencia_hasta": "2026-10-16",
+   "valor": 3170.46
+  },
+  {
+   "vigencia_desde": "2026-10-17",
+   "vigencia_hasta": "2026-10-19",
+   "valor": 3174.67
+  },
+  {
+   "vigencia_desde": "2026-10-20",
+   "vigencia_hasta": "2026-10-20",
+   "valor": 3156.32
+  },
+  {
+   "vigencia_desde": "2026-10-21",
+   "vigencia_hasta": "2026-10-21",
+   "valor": 3163.76
+  },
+  {
+   "vigencia_desde": "2026-10-22",
+   "vigencia_hasta": "2026-10-22",
+   "valor": 3191.47
+  },
+  {
+   "vigencia_desde": "2026-10-23",
+   "vigencia_hasta": "2026-10-23",
+   "valor": 3185.01
+  },
+  {
+   "vigencia_desde": "2026-10-24",
+   "vigencia_hasta": "2026-10-26",
+   "valor": 3158.43
+  },
+  {
+   "vigencia_desde": "2026-10-27",
+   "vigencia_hasta": "2026-10-27",
+   "valor": 3157.94
+  },
+  {
+   "vigencia_desde": "2026-10-28",
+   "vigencia_hasta": "2026-10-28",
+   "valor": 3148.02
+  },
+  {
+   "vigencia_desde": "2026-10-29",
+   "vigencia_hasta": "2026-10-29",
+   "valor": 3162.35
+  },
+  {
+   "vigencia_desde": "2026-10-30",
+   "vigencia_hasta": "2026-10-30",
+   "valor": 3166.91
+  },
+  {
+   "vigencia_desde": "2026-10-31",
+   "vigencia_hasta": "2026-11-03",
+   "valor": 3182.99
+  },
+  {
+   "vigencia_desde": "2026-11-04",
+   "vigencia_hasta": "2026-11-04",
+   "valor": 3235.59
+  },
+  {
+   "vigencia_desde": "2026-11-05",
+   "vigencia_hasta": "2026-11-05",
+   "valor": 3221.19
+  },
+  {
+   "vigencia_desde": "2026-11-06",
+   "vigencia_hasta": "2026-11-06",
+   "valor": 3228.26
+  },
+  {
+   "vigencia_desde": "2026-11-07",
+   "vigencia_hasta": "2026-11-09",
+   "valor": 3237.83
+  },
+  {
+   "vigencia_desde": "2026-11-10",
+   "vigencia_hasta": "2026-11-10",
+   "valor": 3269.88
+  },
+  {
+   "vigencia_desde": "2026-11-11",
+   "vigencia_hasta": "2026-11-12",
+   "valor": 3297.07
+  }
+ ],
+ "crudo": "datos/crudo/trm/2026-11-12/respuesta.json"
+}
