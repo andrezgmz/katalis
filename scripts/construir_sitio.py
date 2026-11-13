@@ -8,7 +8,7 @@ Cada archivo de contenido/ empieza con una línea de datos:
 y luego el HTML del cuerpo. Encabezado, pie, contacto y política de seguridad
 viven solo aquí, para cambiarlos una vez.
 """
-import datetime as dt, json, pathlib, re
+import datetime as dt, html, json, pathlib, re
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 
@@ -66,10 +66,11 @@ def pulso_macro(hoy):
     for clave in ("trm", "tasa_emisor", "inflacion"):
         d = macro.get(clave, {})
         nombre = {"trm": "TRM", "tasa_emisor": "Tasa del Emisor", "inflacion": "Inflación anual"}[clave]
-        url = d.get("url_fuente") or {"trm": "https://www.datos.gov.co/d/32sa-8pi3",
+        # La URL sale de esta constante, no de macro.json; todo valor del JSON se escapa (defensa en profundidad).
+        url = {"trm": "https://www.datos.gov.co/d/32sa-8pi3",
                "tasa_emisor": "https://suameca.banrep.gov.co/estadisticas-economicas/informacionSerie/59/tasas_interes_politica_monetaria",
                "inflacion": "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc"}[clave]
-        fuente = f'<a class="pulso-fuente" href="{url}" rel="noopener" title="Fuente oficial: {d.get("fuente", PULSO_FUENTE_CORTA[clave])}">{PULSO_FUENTE_CORTA[clave]}</a>'
+        fuente = f'<a class="pulso-fuente" href="{url}" rel="noopener" title="Fuente oficial: {html.escape(str(d.get("fuente", PULSO_FUENTE_CORTA[clave])), quote=True)}">{PULSO_FUENTE_CORTA[clave]}</a>'
         if d.get("valor") is None:
             items.append(f'<span class="pulso-item" data-clave="{clave}"><span class="pulso-nombre">{nombre}:</span> '
                          f'<b class="pulso-valor" data-valor="">sin dato</b> {fuente}</span>')
@@ -82,7 +83,7 @@ def pulso_macro(hoy):
             texto, fecha = _num(d["valor"]) + " %", f'{MESES_CORTOS[int(d["mes"][5:]) - 1]} {d["mes"][:4]}'
         viejo = desactualizado(clave, d, hoy)
         items.append(f'<span class="pulso-item" data-clave="{clave}" data-desactualizado="{str(viejo).lower()}">'
-                     f'<span class="pulso-nombre">{nombre}</span> <b class="pulso-valor" data-valor="{d["valor"]}">{texto}</b> '
+                     f'<span class="pulso-nombre">{nombre}</span> <b class="pulso-valor" data-valor="{html.escape(str(d["valor"]), quote=True)}">{texto}</b> '
                      f'<span class="pulso-fecha">{fecha}</span>'
                      + (' <span class="pulso-viejo">desactualizado</span>' if viejo else "") + f' {fuente}</span>')
     return (f'<div class="pulso" role="region" aria-label="Pulso macro: cifras oficiales" data-hoy="{hoy.isoformat()}">'
