@@ -28,6 +28,9 @@ AGENTE = "KatalisDatos/1.0 (+https://katalispartners.com.co)"
 CERT_BANREP = pathlib.Path(__file__).resolve().parent / "certificados" / "GeoTrustEVRSACAG2.crt.pem"
 CERT_BANREP_SHA256 = "2d140f20b8a96e2b4d2f1cc5aca5e5a1e7dc56a7491e510906960f38d2d21aef"
 HOSTS_BANREP = {"suameca.banrep.gov.co"}
+# Fecha de vencimiento del intermedio (campo notAfter, verificado con openssl). Va fija junto a la huella:
+# si se cambia el archivo, la huella deja de coincidir y hay que actualizar las dos.
+CERT_BANREP_VENCE = dt.datetime(2030, 7, 2, 12, 42, 57, tzinfo=dt.timezone.utc)
 
 
 class ErrorFuente(Exception):
@@ -61,20 +64,39 @@ def contexto_banrep():
 
 
 def vencimiento_cert_banrep():
-    """Fecha de vencimiento (UTC) del intermedio guardado."""
-    texto = ssl._ssl._test_decode_cert(str(CERT_BANREP))["notAfter"]  # p. ej. 'Jul  2 12:42:57 2030 GMT'
-    return dt.datetime.strptime(texto, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=dt.timezone.utc)
+    """Fecha de vencimiento (UTC) del intermedio guardado (constante junto a su huella)."""
+    return CERT_BANREP_VENCE
+
+
+class RedireccionSegura(urllib.request.HTTPRedirectHandler):
+    """Solo sigue redirecciones https:// al mismo host. Cualquier otra es un error de la fuente."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        destino = urllib.parse.urlsplit(urllib.parse.urljoin(req.full_url, newurl))
+        origen = urllib.parse.urlsplit(req.full_url)
+        if destino.scheme != "https" or destino.hostname != origen.hostname:
+            raise ErrorFuente(f"redirección no permitida ({code}) de {origen.scheme}://{origen.hostname} "
+                              f"a {destino.scheme}://{destino.hostname}")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def abridor(ctx):
+    """urllib con TLS verificado (ctx) y sin redirecciones a otro esquema u otro host."""
+    return urllib.request.build_opener(RedireccionSegura(), urllib.request.HTTPSHandler(context=ctx))
 
 
 def descargar(url, intentos=3, espera=5, timeout=90):
     """GET con reintentos. Devuelve (bytes, encabezados). Nunca desactiva la verificación TLS."""
-    host = urllib.parse.urlsplit(url).hostname
-    ctx = contexto_banrep() if host in HOSTS_BANREP else ssl.create_default_context()
+    partes = urllib.parse.urlsplit(url)
+    if partes.scheme != "https":
+        raise ErrorFuente(f"solo se consultan fuentes por https: {url}")
+    ctx = contexto_banrep() if partes.hostname in HOSTS_BANREP else ssl.create_default_context()
+    abrir = abridor(ctx)
     pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "*/*"})
     ultimo = None
     for n in range(1, intentos + 1):
         try:
-            with urllib.request.urlopen(pedido, timeout=timeout, context=ctx) as r:
+            with abrir.open(pedido, timeout=timeout) as r:
                 return r.read(), dict(r.headers.items())
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             ultimo = e
