@@ -8,7 +8,7 @@ Cada archivo de contenido/ empieza con una línea de datos:
 y luego el HTML del cuerpo. Encabezado, pie, contacto y política de seguridad
 viven solo aquí, para cambiarlos una vez.
 """
-import json, pathlib, re
+import datetime as dt, html, json, pathlib, re
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 
@@ -31,7 +31,66 @@ MENU = [("estrategia.html", "Estrategia", "estrategia"), ("salud.html", "Salud",
         ("cifras.html", "Cifras", "cifras"), ("blog/index.html", "Blog", "blog"),
         ("libro.html", "Libro", "libro"), ("nosotros.html", "Nosotros", "nosotros")]
 
-def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
+# Pulso macro: franja bajo el encabezado de todas las páginas. Sale de datos/web/macro.json
+# (lo arma la tubería de datos, scripts/tuberia/). Nada se escribe a mano aquí.
+BOGOTA = dt.timezone(dt.timedelta(hours=-5))
+MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+PULSO_FUENTE_CORTA = {"trm": "SFC", "tasa_emisor": "BanRep", "inflacion": "DANE"}
+# Días sin actualizar antes de mostrar «desactualizado» (decisión de Andrés, 12-nov-2026).
+PULSO_LIMITE = {"trm": ("fecha", 7), "tasa_emisor": ("ultima_consulta_ok", 45), "inflacion": ("fecha_publicacion", 45)}
+
+
+def _num(valor, decimales=2):
+    return f"{valor:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+def _fecha_corta(iso):
+    d = dt.date.fromisoformat(iso[:10])
+    return f"{d.day} {MESES_CORTOS[d.month - 1]} {d.year}"
+
+
+def desactualizado(clave, dato, hoy):
+    campo, dias = PULSO_LIMITE[clave]
+    if dato.get("valor") is None or not dato.get(campo):
+        return False
+    return (hoy - dt.date.fromisoformat(dato[campo][:10])).days > dias
+
+
+def pulso_macro(hoy):
+    macro = {}
+    try:
+        macro = json.loads((RAIZ / "datos" / "web" / "macro.json").read_text(encoding="utf-8")).get("indicadores", {})
+    except FileNotFoundError:
+        pass
+    items = []
+    for clave in ("trm", "tasa_emisor", "inflacion"):
+        d = macro.get(clave, {})
+        nombre = {"trm": "TRM", "tasa_emisor": "Tasa del Emisor", "inflacion": "Inflación anual"}[clave]
+        # La URL sale de esta constante, no de macro.json; todo valor del JSON se escapa (defensa en profundidad).
+        url = {"trm": "https://www.datos.gov.co/d/32sa-8pi3",
+               "tasa_emisor": "https://suameca.banrep.gov.co/estadisticas-economicas/informacionSerie/59/tasas_interes_politica_monetaria",
+               "inflacion": "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc"}[clave]
+        fuente = f'<a class="pulso-fuente" href="{url}" rel="noopener" title="Fuente oficial: {html.escape(str(d.get("fuente", PULSO_FUENTE_CORTA[clave])), quote=True)}">{PULSO_FUENTE_CORTA[clave]}</a>'
+        if d.get("valor") is None:
+            items.append(f'<span class="pulso-item" data-clave="{clave}"><span class="pulso-nombre">{nombre}:</span> '
+                         f'<b class="pulso-valor" data-valor="">sin dato</b> {fuente}</span>')
+            continue
+        if clave == "trm":
+            texto, fecha = "$" + _num(d["valor"]), _fecha_corta(d["fecha"])
+        elif clave == "tasa_emisor":
+            texto, fecha = _num(d["valor"]) + " %", "desde " + _fecha_corta(d["vigente_desde"])
+        else:
+            texto, fecha = _num(d["valor"]) + " %", f'{MESES_CORTOS[int(d["mes"][5:]) - 1]} {d["mes"][:4]}'
+        viejo = desactualizado(clave, d, hoy)
+        items.append(f'<span class="pulso-item" data-clave="{clave}" data-desactualizado="{str(viejo).lower()}">'
+                     f'<span class="pulso-nombre">{nombre}</span> <b class="pulso-valor" data-valor="{html.escape(str(d["valor"]), quote=True)}">{texto}</b> '
+                     f'<span class="pulso-fecha">{fecha}</span>'
+                     + (' <span class="pulso-viejo">desactualizado</span>' if viejo else "") + f' {fuente}</span>')
+    return (f'<div class="pulso" role="region" aria-label="Pulso macro: cifras oficiales" data-hoy="{hoy.isoformat()}">'
+            f'<div class="envoltura pulso-fila">{"".join(items)}</div></div>')
+
+
+def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
     nivel = ruta.count("/")
     p = "../" * nivel
     items = "".join(
@@ -68,6 +127,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
 <div class="menu" id="menu">{items}<a class="menu-plataforma" href="{PLATAFORMA}" rel="noopener">Plataforma</a><a class="boton boton-claro" href="{WA}" rel="noopener">Agendar una conversación</a></div>
 </nav>
 </header>
+{pulso}
 <main id="contenido">
 {cuerpo}
 </main>
@@ -95,6 +155,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts):
 
 
 def main():
+    pulso = pulso_macro(dt.datetime.now(BOGOTA).date())
     reemplazos = {"{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{CORREO}}": "mailto:" + CORREO, "{{PLATAFORMA}}": PLATAFORMA,
                   "{{LIBRO}}": LIBRO_HOTMART or "mailto:" + CORREO + "?subject=Av%C3%ADsame%20cuando%20salga%20Ejecutar%20sin%20Miedo",
                   "{{LIBRO_TEXTO}}": "Comprar en Hotmart" if LIBRO_HOTMART else "Avísame cuando salga"}
@@ -106,7 +167,7 @@ def main():
             cuerpo = cuerpo.replace(k, v)
         ruta = fuente.relative_to(RAIZ / "contenido").as_posix()
         cuerpo = cuerpo.replace("{{RAIZ}}", "../" * ruta.count("/"))
-        html = pagina(ruta, meta["titulo"], meta["descripcion"], meta.get("menu", ""), cuerpo, meta.get("js", []))
+        html = pagina(ruta, meta["titulo"], meta["descripcion"], meta.get("menu", ""), cuerpo, meta.get("js", []), pulso)
         (RAIZ / ruta).parent.mkdir(parents=True, exist_ok=True)
         (RAIZ / ruta).write_text(html, encoding="utf-8")
         hechas.append(ruta)

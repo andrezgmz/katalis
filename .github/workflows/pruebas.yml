@@ -1,0 +1,38 @@
+# CI de cada PR a main: pruebas unitarias de la tubería y verificación del sitio.
+# Solo lectura, sin secretos, sin consultar las fuentes (decision-fase0-reporte-SOC-13nov, P3).
+name: pruebas
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pruebas-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Traer el PR (sin credencial guardada)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Pruebas unitarias de la tubería
+        run: python3 -m unittest discover -s pruebas -p "test_*.py" -v
+
+      - name: Instalar Playwright (fuera del repositorio)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y > /dev/null
+          npm i --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+          ln -s "$RUNNER_TEMP/pw/node_modules" "$GITHUB_WORKSPACE/node_modules"
+
+      - name: Verificar el sitio
+        run: node pruebas/verificar.mjs

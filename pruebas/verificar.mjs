@@ -8,6 +8,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const TIPOS = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
@@ -197,6 +198,51 @@ for (const p of PAGINAS) {
   if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html) || /\sstyle=/i.test(html) || /\son[a-z]+=/i.test(html)) falla(p, "código", "código o estilo en línea");
   if (!html.includes('class="menu-plataforma" href="https://andrezgmz.github.io/ejecutar-sin-miedo/" rel="noopener"')) falla(p, "código", "falta «Plataforma» en el menú");
 }
+// Pulso macro: la franja existe en las 11 páginas y sus cifras salen de datos/web/macro.json.
+{
+  const macro = JSON.parse(await readFile(join(RAIZ, "datos/web/macro.json"), "utf8")).indicadores;
+  const OFICIALES = { trm: "https://www.datos.gov.co/", tasa_emisor: "https://suameca.banrep.gov.co/", inflacion: "https://www.dane.gov.co/" };
+  const LIMITE = { trm: ["fecha", 7], tasa_emisor: ["ultima_consulta_ok", 45], inflacion: ["fecha_publicacion", 45] };
+  const num = (v) => v.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  for (const p of PAGINAS) {
+    const html = await readFile(join(RAIZ, p), "utf8");
+    const franjas = html.match(/<div class="pulso" [^>]*data-hoy="(\d{4}-\d{2}-\d{2})">/g) || [];
+    if (franjas.length !== 1) { falla(p, "pulso", `${franjas.length} franjas «Pulso macro» (se espera 1)`); continue; }
+    if (html.indexOf('<div class="pulso"') < html.indexOf("</header>") || html.indexOf('<div class="pulso"') > html.indexOf('<main id="contenido">')) falla(p, "pulso", "la franja no está entre el encabezado y el contenido");
+    const hoy = new Date(franjas[0].match(/data-hoy="([^"]+)"/)[1] + "T00:00:00Z");
+    for (const clave of ["trm", "tasa_emisor", "inflacion"]) {
+      const item = (html.match(new RegExp(`<span class="pulso-item" data-clave="${clave}"[\\s\\S]*?</a></span>`)) || [])[0];
+      if (!item) { falla(p, "pulso", `falta ${clave}`); continue; }
+      const d = macro[clave];
+      const valor = (item.match(/data-valor="([^"]*)"/) || [])[1];
+      const visible = (item.match(/<b class="pulso-valor"[^>]*>([^<]*)<\/b>/) || [])[1];
+      const enlace = (item.match(/class="pulso-fuente" href="([^"]+)"/) || [])[1] || "";
+      if (!enlace.startsWith(OFICIALES[clave])) falla(p, "pulso", `${clave}: enlace a fuente no oficial ${enlace}`);
+      if (d.valor === null || d.valor === undefined) {
+        if (valor !== "" || visible !== "sin dato") falla(p, "pulso", `${clave}: sin dato en macro.json pero la página muestra «${visible}»`);
+        continue;
+      }
+      if (Number(valor) !== d.valor) falla(p, "pulso", `${clave}: ${valor} ≠ macro.json ${d.valor}`);
+      const esperado = clave === "trm" ? "$" + num(d.valor) : num(d.valor) + " %";
+      if (visible !== esperado) falla(p, "pulso", `${clave}: muestra «${visible}», se esperaba «${esperado}»`);
+      const [campo, dias] = LIMITE[clave];
+      const viejo = (hoy - new Date(d[campo].slice(0, 10) + "T00:00:00Z")) / 864e5 > dias;
+      const marcado = item.includes('data-desactualizado="true"') && item.includes(">desactualizado</span>");
+      if (viejo !== marcado) falla(p, "pulso", `${clave}: «desactualizado» = ${marcado}, la regla dice ${viejo}`);
+    }
+  }
+}
+
+// Archivos en git: ningún .xlsx fuera de datos/crudo/ (ahí solo van respuestas públicas tal cual, p. ej. el anexo
+// del DANE) y nada de datos/fuente/ (el Excel privado de trabajo). Regla del 12-nov-2026.
+{
+  const enGit = execFileSync("git", ["ls-files"], { cwd: RAIZ, encoding: "utf8" }).split("\n").filter(Boolean);
+  for (const f of enGit) {
+    if (/\.xlsx?$/i.test(f) && !f.startsWith("datos/crudo/")) falla(f, "git", "Excel fuera de datos/crudo/");
+    if (f.startsWith("datos/fuente/")) falla(f, "git", "archivo de datos/fuente/ en git (es privado)");
+  }
+}
+
 for (const js of ["assets/js/sitio.js", "assets/js/cifras.js", "assets/js/radar-demo.js"]) {
   const codigo = (await readFile(join(RAIZ, js), "utf8")).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
   if (/innerHTML|outerHTML|insertAdjacentHTML|document\.write|localStorage|sessionStorage|indexedDB|document\.cookie/.test(codigo)) falla(js, "código", "usa innerHTML, almacenamiento o cookies");

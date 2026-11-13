@@ -1,0 +1,36 @@
+{
+ "generado": "2026-11-12T16:35:23+00:00",
+ "nota": "Lo genera scripts/tuberia/empaquetar.py; no se edita a mano.",
+ "indicadores": {
+  "trm": {
+   "nombre": "TRM",
+   "unidad": "pesos por dólar",
+   "fuente": "Superintendencia Financiera",
+   "url_fuente": "https://www.datos.gov.co/d/32sa-8pi3",
+   "ultima_consulta_ok": "2026-11-12T16:35:23+00:00",
+   "valor": 3297.07,
+   "fecha": "2026-11-11",
+   "fecha_publicacion": "2026-11-11"
+  },
+  "tasa_emisor": {
+   "nombre": "Tasa del Emisor",
+   "unidad": "% efectivo anual",
+   "fuente": "Banco de la República",
+   "url_fuente": "https://suameca.banrep.gov.co/estadisticas-economicas/informacionSerie/59/tasas_interes_politica_monetaria",
+   "ultima_consulta_ok": "2026-11-12T16:35:23+00:00",
+   "valor": 12.25,
+   "fecha": "2026-11-12",
+   "vigente_desde": "2026-10-01"
+  },
+  "inflacion": {
+   "nombre": "Inflación anual",
+   "unidad": "% anual",
+   "fuente": "DANE",
+   "url_fuente": "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc",
+   "ultima_consulta_ok": "2026-11-12T16:35:23+00:00",
+   "valor": 6.3,
+   "mes": "2026-10",
+   "fecha_publicacion": "2026-11-09"
+  }
+ }
+}
