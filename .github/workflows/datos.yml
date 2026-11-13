@@ -1,50 +1,94 @@
-# Tubería de datos de Katalis Cifras (Fase 0: Pulso macro).
-# extraer → validar → calcular → empaquetar → construir el sitio → verificar.
+# Tubería de datos de Katalis Cifras (Fase 0: Pulso macro). Ver README («Tubería de datos»).
 #
-# Modo PRUEBA (a mano desde una rama distinta de main): no hace commit ni abre issues;
-#   sube el resultado como artifact para revisarlo.
-# Modo PUBLICACIÓN (main: programado o a mano): si las pruebas pasan, hace commit
-#   «datos: corte AAAA-MM-DD» a main con lo que sí validó, y abre o actualiza un issue
-#   «Falla en la tubería: <fuente>» por cada fuente que falló. Ver README («Tubería de datos»).
+# Jobs y permisos (decision-fase0-reporte-SOC-13nov, B1):
+#   procesar           solo lectura. Extrae, valida, calcula, revisa saltos, construye y verifica el sitio
+#                      (aquí corren npm y Playwright). Sube el resultado como artifact. No tiene credencial de escritura.
+#   publicar           solo en main. NO instala nada ni ejecuta código del repositorio: baja el artifact,
+#                      copia solo datos/, *.html, blog/*.html y sitemap.xml, hace commit y push (contents: write).
+#   aprobar-anomalias  solo en main y solo si hubo un salto anómalo. Espera la aprobación de Andrés
+#                      (environment «datos-anomalos») y publica la variante con el salto, ya verificada en «procesar».
+#   avisar             solo en main. Abre o comenta issues (issues: write).
+#   cierre             termina en rojo si una fuente falló o un job falló.
+# Modo PRUEBA (a mano desde otra rama): solo «procesar» y «cierre»; el resultado queda como artifact.
 name: datos
 
 on:
   schedule:
     - cron: "17 11 * * *"   # 6:17 a. m. en Bogotá
   workflow_dispatch:
+    inputs:
+      probar_aprobacion:
+        description: "Marcar la TRM como salto anómalo para probar la puerta de aprobación (el dato es el real)"
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
-  issues: write
-
-concurrency:
-  group: datos-${{ github.ref }}
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  tuberia:
+  procesar:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    concurrency:
+      group: datos-procesar-${{ github.ref }}
+      cancel-in-progress: false
     env:
       MODO: ${{ github.ref == 'refs/heads/main' && 'publicacion' || 'prueba' }}
+      PROBAR: ${{ inputs.probar_aprobacion == true && '--probar-aprobacion' || '' }}
+    outputs:
+      corte: ${{ steps.aplicar.outputs.corte }}
+      fallas: ${{ steps.aplicar.outputs.fallas }}
+      anomalias: ${{ steps.extraer.outputs.anomalias }}
+      fuentes_anomalas: ${{ steps.extraer.outputs.fuentes_anomalas }}
     steps:
       - name: Preparar rutas temporales
-        run: echo "RESUMEN=$RUNNER_TEMP/resumen.json" >> "$GITHUB_ENV"
+        run: |
+          {
+            echo "TRABAJO=$RUNNER_TEMP/trabajo"
+            echo "RESUMEN=$RUNNER_TEMP/diagnostico/resumen.json"
+            echo "RESUMEN_B=$RUNNER_TEMP/diagnostico/resumen-con-anomalias.json"
+            echo "VARIANTE_B=$RUNNER_TEMP/con-anomalias"
+          } >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/diagnostico"
 
-      - name: Traer el repositorio
+      - name: Traer el repositorio (sin credencial guardada)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: ${{ github.ref == 'refs/heads/main' }}
+          persist-credentials: false
 
       - name: Pruebas unitarias de la tubería
         run: python3 -m unittest discover -s pruebas -p "test_*.py" -v
 
-      - name: Tubería (extraer, validar, calcular, empaquetar)
+      - name: Extraer, validar, calcular y revisar saltos
+        id: extraer
         run: |
           python3 --version
-          python3 scripts/tuberia/correr.py --modo "$MODO" --resumen "$RESUMEN" --rechazados "$RUNNER_TEMP/rechazados"
-          echo "### Tubería de datos · modo $MODO" >> "$GITHUB_STEP_SUMMARY"
-          python3 -c "import json,sys; r=json.load(open(sys.argv[1],encoding='utf-8')); [print(f'- {k}: {v.get(\"valor\")}') for k,v in r['macro'].items()]; print(f'- fallas: {len(r[\"fallas\"])}')" "$RESUMEN" >> "$GITHUB_STEP_SUMMARY"
+          python3 scripts/tuberia/correr.py --etapa extraer --resultados "$TRABAJO" $PROBAR
+          python3 - "$TRABAJO/extraccion.json" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, sys
+          a = json.load(open(sys.argv[1], encoding="utf-8"))["anomalias"]
+          print("anomalias=" + ("true" if a else "false"))
+          print("fuentes_anomalas=" + ",".join(f for f in a if re.fullmatch(r"[a-z_]+", f)))
+          PY
+
+      - name: Copia aparte para la variante con salto anómalo
+        if: steps.extraer.outputs.anomalias == 'true'
+        run: cp -a "$GITHUB_WORKSPACE" "$VARIANTE_B"
+
+      - name: Aplicar (los saltos anómalos quedan retenidos)
+        id: aplicar
+        run: |
+          python3 scripts/tuberia/correr.py --etapa aplicar --resultados "$TRABAJO" --modo "$MODO" --resumen "$RESUMEN"
+          python3 - "$RESUMEN" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, sys
+          r = json.load(open(sys.argv[1], encoding="utf-8"))
+          print(f"corte={r['corte']}")
+          print(f"fallas={len(r['fallas'])}")
+          PY
+          {
+            echo "### Tubería de datos · modo $MODO"
+            python3 -c "import json,sys; r=json.load(open(sys.argv[1],encoding='utf-8')); [print(f'- {k}: {v.get(\"valor\")}') for k,v in r['macro'].items()]; print(f'- fallas: {len(r[\"fallas\"])}'); [print(f'- **salto anómalo retenido · {a[\"fuente\"]}:** ' + ' | '.join(a['motivos'])) for a in r['anomalias']]" "$RESUMEN"
+          } >> "$GITHUB_STEP_SUMMARY"
           tail -n 4 datos/registro.jsonl
 
       - name: Construir el sitio
@@ -61,39 +105,182 @@ jobs:
       - name: Verificar el sitio
         run: node pruebas/verificar.mjs
 
-      - name: Guardar el resultado (artifact)
+      - name: Variante con salto anómalo (aplicar, construir y verificar)
+        if: steps.extraer.outputs.anomalias == 'true'
+        working-directory: ${{ env.VARIANTE_B }}
+        run: |
+          python3 scripts/tuberia/correr.py --etapa aplicar --resultados "$TRABAJO" --modo "$MODO" --resumen "$RESUMEN_B" --con-anomalias
+          python3 scripts/construir_sitio.py
+          ln -s "$RUNNER_TEMP/pw/node_modules" node_modules
+          node pruebas/verificar.mjs
+          rm node_modules
+
+      - name: Guardar lo publicable (artifact)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: publicable
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            datos/
+            *.html
+            blog/*.html
+            sitemap.xml
+
+      - name: Guardar la variante con salto anómalo (artifact)
+        if: steps.extraer.outputs.anomalias == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: con-anomalias
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ${{ env.VARIANTE_B }}/datos/
+            ${{ env.VARIANTE_B }}/*.html
+            ${{ env.VARIANTE_B }}/blog/*.html
+            ${{ env.VARIANTE_B }}/sitemap.xml
+
+      - name: Guardar el diagnóstico (resumen y respuestas rechazadas)
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: tuberia-${{ env.MODO }}-${{ github.run_id }}
+          name: diagnostico
           retention-days: 30
           path: |
-            datos/registro.jsonl
-            datos/web/
-            datos/indicadores/
-            datos/limpio/
-            datos/crudo/
-            ${{ runner.temp }}/resumen.json
-            ${{ runner.temp }}/rechazados/
+            ${{ runner.temp }}/diagnostico/
+            ${{ runner.temp }}/trabajo/
 
-      - name: Publicar el corte en main
-        if: env.MODO == 'publicacion'
+  publicar:
+    needs: procesar
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: datos-publicar
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.empujar.outputs.sha }}
+    steps:
+      - name: Traer main (sin credencial guardada)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Bajar lo publicable
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: publicable
+          path: ${{ runner.temp }}/publicable
+
+      - name: Copiar solo datos y páginas, hacer commit y push
+        id: empujar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CORTE: ${{ needs.procesar.outputs.corte }}
+          ORIGEN: ${{ runner.temp }}/publicable
         run: |
-          git config user.name "katalis-datos[bot]"
+          set -euo pipefail
+          # El artifact solo puede traer datos/, páginas .html y sitemap.xml; cualquier otra ruta detiene la publicación.
+          raros=$(cd "$ORIGEN" && find . -type f | sed 's|^\./||' | grep -Ev '^(datos/.+|[^/]+\.html|blog/[^/]+\.html|sitemap\.xml)$' || true)
+          if [ -n "$raros" ]; then echo "::error::El artifact trae rutas no permitidas: $raros"; exit 1; fi
+          cp -R "$ORIGEN/." .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos/ ./*.html blog/*.html sitemap.xml
+          if git diff --cached --quiet; then
+            echo "Sin cambios que publicar."
+          else
+            [[ "$CORTE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::corte inválido"; exit 1; }
+            git commit -m "datos: corte $CORTE"
+            remoto="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            if ! git push "$remoto" HEAD:main; then
+              echo "main avanzó durante la corrida: se reaplica el commit de datos encima y se reintenta una vez."
+              git pull --rebase "$remoto" main
+              git push "$remoto" HEAD:main
+            fi
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  aprobar-anomalias:
+    needs: [procesar, publicar]
+    if: github.ref == 'refs/heads/main' && needs.procesar.outputs.anomalias == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: datos-anomalos     # revisor requerido: andrezgmz (ver README)
+    concurrency:
+      group: datos-aprobacion
+      cancel-in-progress: true      # una aprobación pendiente vieja la reemplaza la de la corrida nueva
+    permissions:
+      contents: write
+    steps:
+      - name: Traer main (sin credencial guardada)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Confirmar que main no avanzó desde la verificación
+        env:
+          ESPERADO: ${{ needs.publicar.outputs.sha }}
+        run: |
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "$ESPERADO" ]; then
+            echo "::error::main avanzó ($ESPERADO → $actual) mientras se esperaba la aprobación. No se publica: la próxima corrida vuelve a evaluar el salto sobre los datos nuevos."
+            exit 1
+          fi
+
+      - name: Bajar la variante con salto anómalo
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: con-anomalias
+          path: ${{ runner.temp }}/con-anomalias
+
+      - name: Copiar solo datos y páginas, hacer commit y push
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CORTE: ${{ needs.procesar.outputs.corte }}
+          FUENTES: ${{ needs.procesar.outputs.fuentes_anomalas }}
+          ORIGEN: ${{ runner.temp }}/con-anomalias
+        run: |
+          set -euo pipefail
+          raros=$(cd "$ORIGEN" && find . -type f | sed 's|^\./||' | grep -Ev '^(datos/.+|[^/]+\.html|blog/[^/]+\.html|sitemap\.xml)$' || true)
+          if [ -n "$raros" ]; then echo "::error::El artifact trae rutas no permitidas: $raros"; exit 1; fi
+          [[ "$CORTE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ && "$FUENTES" =~ ^[a-z_,]+$ ]] || { echo "::error::salidas inválidas"; exit 1; }
+          cp -R "$ORIGEN/." .
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add datos/ ./*.html blog/*.html sitemap.xml
           if git diff --cached --quiet; then echo "Sin cambios que publicar."; exit 0; fi
-          corte=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1],encoding='utf-8'))['corte'])" "$RESUMEN")
-          git commit -m "datos: corte $corte"
-          git push origin HEAD:main
+          git commit -m "datos: corte $CORTE (salto anómalo aprobado por Andrés: $FUENTES)"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
 
-      - name: Avisar fallas con un issue
-        if: always() && env.MODO == 'publicacion'
+  avisar:
+    needs: [procesar, publicar]
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      issues: write
+    steps:
+      - name: Bajar el diagnóstico
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: diagnostico
+          path: ${{ runner.temp }}/diagnostico
+
+      - name: Abrir o comentar issues
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          RESULTADO_PASOS: ${{ job.status }}
+          PROCESAR: ${{ needs.procesar.result }}
+          PUBLICAR: ${{ needs.publicar.result }}
         run: |
+          resumen="$RUNNER_TEMP/diagnostico/diagnostico/resumen.json"
+          [ -f "$resumen" ] || resumen=$(find "$RUNNER_TEMP/diagnostico" -name resumen.json | head -1)
           avisar () {
             titulo="$1"; cuerpo="$2"
             numero=$(gh issue list --state open --search "\"$titulo\" in:title" --json number,title \
@@ -104,26 +291,38 @@ jobs:
               gh issue create --title "$titulo" --body "$cuerpo" || echo "::warning::No se pudo abrir el issue «$titulo» (¿issues desactivados en el repositorio?)"
             fi
           }
-          if [ -f "$RESUMEN" ]; then
-            python3 - "$RESUMEN" > "$RUNNER_TEMP/avisos.tsv" <<'PY'
-          import json, sys
-          r = json.load(open(sys.argv[1], encoding="utf-8"))
-          for f in r["fallas"]:
-              print(f"Falla en la tubería: {f['fuente']}\t{f['error']}")
-          for a in r["avisos"]:
-              print(f"{a['titulo']}\t{a['detalle']}")
-          PY
+          # El detalle puede traer texto de la fuente: se limpia (sin tabs ni saltos, máx. 500 caracteres) y va en bloque de código.
+          if [ -n "$resumen" ] && [ -f "$resumen" ]; then
+            jq -r '
+              def limpio: tostring | gsub("[\t\r\n`]"; " ") | .[0:500];
+              (.fallas[]    | "Falla en la tubería: \(.fuente | limpio)\t\(.error | limpio)"),
+              (.anomalias[] | "Revisar: salto anómalo en \(.fuente | limpio)\t\(.motivos | join(" | ") | limpio)"),
+              (.avisos[]    | "\(.titulo | limpio)\t\(.detalle | limpio)")' "$resumen" > "$RUNNER_TEMP/avisos.tsv"
             while IFS=$'\t' read -r titulo detalle; do
-              avisar "$titulo" "$detalle"$'\n\n'"Ejecución: $EJECUCION"$'\n'"La web conserva el último valor bueno de esa fuente."
+              nota="La web conserva el último valor bueno de esa fuente."
+              case "$titulo" in Revisar:*) nota="El dato nuevo espera la aprobación de Andrés en la ejecución (ver README, «Aprobar un salto anómalo»). Mientras tanto la web conserva el último valor bueno.";; esac
+              avisar "$titulo" "\`\`\`"$'\n'"$detalle"$'\n'"\`\`\`"$'\n\n'"Ejecución: $EJECUCION"$'\n'"$nota"
             done < "$RUNNER_TEMP/avisos.tsv"
           else
             avisar "Falla en la tubería: ejecución" "La tubería no llegó a escribir su resumen."$'\n\n'"Ejecución: $EJECUCION"
           fi
-          if [ "$RESULTADO_PASOS" != "success" ]; then
-            avisar "Falla en la tubería: pruebas o publicación" "Falló un paso (pruebas unitarias, construir, verificar o publicar). No se publicó el corte."$'\n\n'"Ejecución: $EJECUCION"
+          if [ "$PROCESAR" != "success" ] || [ "$PUBLICAR" != "success" ]; then
+            avisar "Falla en la tubería: pruebas o publicación" "procesar: $PROCESAR · publicar: $PUBLICAR. No se publicó el corte."$'\n\n'"Ejecución: $EJECUCION"
           fi
 
-      - name: Terminar en rojo si alguna fuente falló
-        if: always()
+  cierre:
+    needs: [procesar, publicar]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Terminar en rojo si una fuente o un job falló
+        env:
+          PROCESAR: ${{ needs.procesar.result }}
+          PUBLICAR: ${{ needs.publicar.result }}
+          FALLAS: ${{ needs.procesar.outputs.fallas }}
         run: |
-          python3 -c "import json,sys; r=json.load(open(sys.argv[1],encoding='utf-8')); f=r['fallas']; [print('::error::'+x['fuente']+': '+x['error']) for x in f]; sys.exit(1 if f else 0)" "$RESUMEN"
+          echo "procesar: $PROCESAR · publicar: $PUBLICAR · fuentes con falla: ${FALLAS:-?}"
+          [ "$PROCESAR" = "success" ] || exit 1
+          [ "$PUBLICAR" = "success" ] || [ "$PUBLICAR" = "skipped" ] || exit 1
+          [ "$FALLAS" = "0" ] || exit 1

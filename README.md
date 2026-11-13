@@ -63,20 +63,47 @@ datos/registro.jsonl: una línea por fuente y ejecución (URL, consulta, hora UT
 - **Correr a mano:** `python scripts/tuberia/correr.py`, después `python scripts/construir_sitio.py` y `node pruebas/verificar.mjs`. Solo usa la librería estándar de Python y no necesita claves.
 - **Pruebas de los validadores:** `python -m unittest discover -s pruebas -p "test_*.py"`.
 - **Si una fuente falla:** no avanza, las demás siguen y la web conserva su último valor bueno. Si un dato pasa del plazo (TRM 7 días; tasa del Emisor 45 días sin consulta exitosa; IPC 45 días desde su publicación), la franja lo marca como «desactualizado».
-- **Automático:** `.github/workflows/datos.yml` corre todos los días a las 6:17 a. m. de Bogotá (11:17 UTC) y también a mano (`workflow_dispatch`).
-  - En `main` (modo publicación): si todo pasa, hace commit «datos: corte AAAA-MM-DD» y abre o actualiza un issue «Falla en la tubería: <fuente>» por cada fuente que falló.
-  - Lanzado a mano desde otra rama (modo prueba): no hace commit ni abre issues; deja el resultado como artifact.
+- **Saltos anómalos** (`scripts/tuberia/saltos.py`): cada valor nuevo se compara con el último valor bueno publicado. Si salta más de lo normal, **no se publica solo**:
+  - TRM: más de ±5 % frente al último valor;
+  - tasa del Emisor: un cambio que no sea múltiplo de 0,25 puntos, o de más de 1 punto;
+  - inflación anual: más de 1,5 puntos frente al último mes publicado;
+  - historia: si la fuente cambia un valor ya publicado de un periodo pasado;
+  - cartera SFC: más de ±10 % frente al corte anterior (entra con la Fase 1, cuando se publique).
+- **Automático:** `.github/workflows/datos.yml` corre todos los días a las 6:17 a. m. de Bogotá (11:17 UTC) y también a mano (`workflow_dispatch`). Tiene 5 jobs:
+  - `procesar` (solo lectura): extrae, valida, calcula, revisa saltos, construye y verifica el sitio, y guarda el resultado como artifact. Es el único que instala algo (Playwright) y no tiene credencial de escritura.
+  - `publicar` (solo en `main`): no instala nada ni corre código del repositorio. Baja el artifact, copia solo `datos/`, las páginas `.html` y `sitemap.xml`, y hace commit «datos: corte AAAA-MM-DD» y push. Es el único job con permiso de escribir en el repositorio, junto con el siguiente.
+  - `aprobar-anomalias` (solo en `main` y solo si hubo un salto): espera la aprobación de Andrés y publica la variante con el salto, que ya se construyó y verificó en `procesar`.
+  - `avisar` (solo en `main`): abre o comenta un issue por cada fuente que falló («Falla en la tubería: <fuente>») y por cada salto («Revisar: salto anómalo en <fuente>»).
+  - `cierre`: termina en rojo si una fuente o un job falló.
+  - Lanzado a mano desde otra rama (modo prueba): solo `procesar` y `cierre`; no hace commit ni abre issues.
+- **CI de los PR:** `.github/workflows/pruebas.yml` corre las pruebas unitarias y `verificar.mjs` en cada PR a `main`, con permiso de solo lectura y sin consultar las fuentes.
 - **Cómo llega el aviso de una falla:** hoy los issues del repositorio están desactivados; si se activan o no, lo decide Andrés. Mientras sigan así:
   - el aviso es el **correo que GitHub manda cuando una ejecución termina en rojo**. La tubería termina en rojo si una fuente falla o si una prueba no pasa;
   - el intento de abrir el issue queda como advertencia dentro de la ejecución;
-  - el detalle está en el resumen de la ejecución y en su artifact.
+  - el detalle está en el resumen de la ejecución y en su artifact `diagnostico`.
 
   Si se activan los issues, el mismo workflow empieza a abrirlos sin cambiar nada.
+
+### Aprobar un salto anómalo
+
+Cuando hay un salto, la ejecución publica todo lo demás y deja el job `aprobar-anomalias` esperando. La web conserva el último valor bueno de esa fuente hasta que Andrés decida. GitHub le manda un correo a Andrés («review pending»).
+
+1. Abra la ejecución (enlace del correo, o *Actions → datos*). Arriba aparece «Review pending deployments».
+2. Lea en el resumen de la ejecución el motivo del salto (sección «Tubería de datos», línea «salto anómalo retenido»). Compárelo con la fuente oficial.
+3. Clic en **Review deployments**, marque `datos-anomalos` y elija:
+   - **Approve and deploy**: publica el dato nuevo. El commit dice «datos: corte AAAA-MM-DD (salto anómalo aprobado por Andrés: <fuente>)» y `registro.jsonl` lo anota.
+   - **Reject**: no publica nada; la web sigue con el último valor bueno. Al día siguiente la tubería vuelve a evaluar.
+4. Si no decide, la espera vence a los 30 días. Si mientras tanto `main` cambió (otra corrida o un PR), la aprobación ya no publica: el job se detiene y la corrida siguiente vuelve a evaluar sobre los datos nuevos.
+
+**Probar la puerta sin esperar un salto real:** *Actions → datos → Run workflow* en `main`, con «probar_aprobacion» marcado. La TRM se trata como salto (el dato es el real), y así se ve la pantalla de aprobación. Las capturas de esa pantalla se agregan aquí después de la primera prueba en `main` (antes de fusionar no se puede: el workflow solo se lanza desde `main`).
+
+El environment `datos-anomalos` está en *Settings → Environments*: revisor requerido andrezgmz, solo para la rama `main`. Si se borra, GitHub lo vuelve a crear **sin** revisor la próxima vez que el job lo nombre; no lo borre.
+
 - **Capa cruda sin duplicados:** se guarda una carpeta nueva en `datos/crudo/<fuente>/<fecha>/` solo si la respuesta cambió (otro `sha256`). Si es igual, solo se anota «sin cambios» en `registro.jsonl`. Nunca se sobrescribe: un segundo cambio el mismo día va a `<fecha>-2`.
 - **Excel en git:** ningún `.xlsx` fuera de `datos/crudo/`. Ahí solo van respuestas públicas tal cual, como el anexo del IPC del DANE. El Excel privado de `datos/fuente/` sigue ignorado. `pruebas/verificar.mjs` revisa las dos cosas.
 - **Pendiente para la Fase 1:** pasar la tasa del Emisor al servicio SDMX documentado del Banco de la República (versión nueva) y dejar el servicio interno de suameca solo como respaldo si SDMX falla 3 días seguidos.
 
-**Ojo con la protección de `main`:** el robot hace push directo a `main` con el `GITHUB_TOKEN`. Hoy se puede porque la protección solo bloquea `--force` y el borrado. Si después se exigen PR o revisiones en `main`, el robot necesitará una de dos cosas:
+**Ojo con la protección de `main`:** el robot es la única excepción a «nadie empuja a `main`»: hace push directo con el `GITHUB_TOKEN`, y solo desde los jobs `publicar` y `aprobar-anomalias`. Hoy se puede porque la protección solo bloquea `--force` y el borrado. Si después se exigen PR o revisiones en `main`, el robot necesitará una de dos cosas:
 - una excepción para GitHub Actions en la regla de protección;
 - o cambiar el paso «Publicar» para que abra un PR con auto-merge, que hoy está apagado en el repositorio.
 
