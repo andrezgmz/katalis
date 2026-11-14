@@ -150,7 +150,17 @@
    "vigencia_desde": "2026-11-11",
    "vigencia_hasta": "2026-11-12",
    "valor": 3297.07
+  },
+  {
+   "vigencia_desde": "2026-11-13",
+   "vigencia_hasta": "2026-11-13",
+   "valor": 3301.91
+  },
+  {
+   "vigencia_desde": "2026-11-14",
+   "vigencia_hasta": "2026-11-17",
+   "valor": 3316.7
   }
  ],
- "crudo": "datos/crudo/trm/2026-11-12/respuesta.json"
+ "crudo": "datos/crudo/trm/2026-11-13/respuesta.json"
 }
