@@ -33,7 +33,7 @@ La respuesta tal cual queda en `datos/crudo/<fuente>/<AAAA-MM-DD>/`. Solo se gua
 | Interfaz | **No es una API oficial.** Es el servicio que usa la propia página del portal; puede cambiar sin aviso. Lo cubre la validación de estructura. Decisión de Andrés (12-nov-2026): se queda y no se exploran más servicios no documentados. |
 | Frecuencia | Serie diaria; la tasa cambia por decisión de la Junta Directiva |
 | Formato | JSON: lista con una serie (`id`, `unidadCorta`, `fuente`, `fechaUltimoCargue`, `data` = pares [fecha en milisegundos, valor]). Unos 560 KB, se guarda comprimido. |
-| Controles | Una sola serie con `id` 59 y unidad `%`; al menos 100 datos; último valor entre 0 % y 30 %; fecha no futura |
+| Controles | Una sola serie con `id` 59 y unidad `%`; al menos 100 datos; último valor entre 0 % y 30 %. La serie publica la tasa vigente con fechas por delante (p. ej. hasta el día hábil siguiente a un festivo): las filas con fecha posterior a hoy en Bogotá se ignoran y se usa la vigente a hoy; `registro.jsonl` anota cuántas en `filas_futuras_ignoradas`. Si todas son futuras, falla (desde el 14-nov-2026) |
 | Se publica | Último valor y la fecha desde la que rige |
 | «Desactualizado» | Más de 45 días sin una consulta exitosa |
 | Certificado | El servidor no envía su certificado intermedio (ver «Certificado intermedio» abajo) |
