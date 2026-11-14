@@ -67,6 +67,7 @@ datos/registro.jsonl: una línea por fuente y ejecución (URL, consulta, hora UT
 
 - **Correr a mano:** `python scripts/tuberia/correr.py`, después `python scripts/construir_sitio.py` y `node pruebas/verificar.mjs`. Solo usa la librería estándar de Python y no necesita claves.
 - **Pruebas de los validadores:** `python -m unittest discover -s pruebas -p "test_*.py"`.
+- **Sondeo de fuentes nuevas (solo a mano):** `python scripts/sondeo/sondear.py` consulta una vez cada fuente candidata y muestra un resumen. No publica nada ni escribe en el repositorio. El informe del 14-nov-2026 está en katalis-ops (`reportes/sondeo-fuentes-macro-14nov.md`).
 - **Si una fuente falla:** no avanza, las demás siguen y la web conserva su último valor bueno. Si un dato pasa del plazo (TRM 7 días; tasa del Emisor 45 días sin consulta exitosa; IPC 45 días desde su publicación), la franja lo marca como «desactualizado».
 - **Saltos anómalos** (`scripts/tuberia/saltos.py`): cada valor nuevo se compara con el último valor bueno publicado. Si salta más de lo normal, **no se publica solo**:
   - TRM: más de ±5 % frente al último valor;
