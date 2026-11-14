@@ -1,7 +1,7 @@
 {
  "fuente": "tasa_emisor",
  "ultimo": {
-  "fecha": "2026-11-12",
+  "fecha": "2026-11-13",
   "valor": 12.25
  },
  "cambios": [
@@ -563,6 +563,7 @@
   }
  ],
  "fuente_declarada": "Banco de la República",
- "fecha_ultimo_cargue": "12 de noviembre de 2026",
- "crudo": "datos/crudo/tasa_emisor/2026-11-12/respuesta.json.gz"
+ "fecha_ultimo_cargue": "13 de noviembre de 2026",
+ "filas_futuras_ignoradas": 3,
+ "crudo": "datos/crudo/tasa_emisor/2026-11-13/respuesta.json.gz"
 }

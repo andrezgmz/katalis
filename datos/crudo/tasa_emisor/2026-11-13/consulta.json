@@ -1,0 +1,12 @@
+{
+ "url": "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/estadisticaEconomicaRestService/consultaInformacionSerie?idSerie=59",
+ "hora_utc": "2026-11-14T04:06:05+00:00",
+ "encabezados": {
+  "Date": "Sat, 14 Nov 2026 04:06:05 GMT",
+  "Content-Type": "application/json"
+ },
+ "nota": "servicio del portal, no es una API documentada",
+ "sha256": "38dad046336e02f286c00625a8fd2e9b34178e80486ed66f55e0be65196a1da9",
+ "bytes": 561989,
+ "archivo": "datos/crudo/tasa_emisor/2026-11-13/respuesta.json.gz"
+}
