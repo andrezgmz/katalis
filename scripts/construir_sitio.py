@@ -49,6 +49,18 @@ PULSO_FUENTE_CORTA = {"trm": "SFC", "tasa_emisor": "BanRep", "inflacion": "DANE"
 # Días sin actualizar antes de mostrar «desactualizado» (decisión de Andrés, 12-nov-2026).
 PULSO_LIMITE = {"trm": ("fecha", 7), "tasa_emisor": ("ultima_consulta_ok", 45), "inflacion": ("fecha_publicacion", 45)}
 
+# Citas que exige cada fuente (decisión de Andrés, 14-nov-2026). Viven solo aquí.
+# DANE, términos y condiciones, numeral 2: cita textual obligatoria.
+CITA_DANE = "Fuente: Departamento Administrativo Nacional de Estadística: www.dane.gov.co"
+# Banco de la República, aviso legal: fuente y fecha en que se consultó el portal (la de la corrida que trajo el dato).
+CITA_BANREP = "Fuente: Banco de la República."
+SERIE_BANREP_EMISOR = "https://suameca.banrep.gov.co/estadisticas-economicas/informacionSerie/59/tasas_interes_politica_monetaria"
+# TRM: la ficha de datos.gov.co 32sa-8pi3 declara «Creative Commons Attribution | Share Alike 4.0 International»
+# (licenseId CC_40_BY_SA) y atribución «Superintendencia Financiera de Colombia». Verificado el 14-nov-2026.
+CITA_SFC = "Superintendencia Financiera de Colombia vía datos.gov.co · CC BY-SA 4.0"
+FICHA_TRM = "https://www.datos.gov.co/d/32sa-8pi3"
+LICENCIA_CC_BY_SA = "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+
 
 def _num(valor, decimales=2):
     return f"{valor:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
@@ -66,12 +78,38 @@ def desactualizado(clave, dato, hoy):
     return (hoy - dt.date.fromisoformat(dato[campo][:10])).days > dias
 
 
-def pulso_macro(hoy):
-    macro = {}
+def leer_macro():
     try:
-        macro = json.loads((RAIZ / "datos" / "web" / "macro.json").read_text(encoding="utf-8")).get("indicadores", {})
+        return json.loads((RAIZ / "datos" / "web" / "macro.json").read_text(encoding="utf-8")).get("indicadores", {})
     except FileNotFoundError:
-        pass
+        return {}
+
+
+def consulta_banrep(macro):
+    """«Consultado el …» con la fecha (Bogotá) de la última consulta exitosa que guardó la tubería; None si no hay dato."""
+    d = macro.get("tasa_emisor", {})
+    if d.get("valor") is None or not d.get("ultima_consulta_ok"):
+        return None
+    momento = dt.datetime.fromisoformat(d["ultima_consulta_ok"]).astimezone(BOGOTA)
+    return _fecha_corta(momento.date().isoformat())
+
+
+def citas(macro):
+    """Las tres citas en HTML (franja y privacidad). El texto exigido queda intacto; los enlaces no lo cambian."""
+    fecha = consulta_banrep(macro)
+    banrep = CITA_BANREP.replace("Banco de la República",
+                                 f'<a href="{SERIE_BANREP_EMISOR}" rel="noopener">Banco de la República</a>')
+    entidad, licencia = CITA_SFC.split(" · ")
+    return {
+        "trm": (f'<a href="{FICHA_TRM}" rel="noopener">{entidad}</a> · '
+                f'<a href="{LICENCIA_CC_BY_SA}" rel="license noopener">{licencia}</a>'),
+        "tasa_emisor": banrep + (f" Consultado el {fecha}." if fecha else ""),
+        "inflacion": CITA_DANE.replace("www.dane.gov.co", '<a href="https://www.dane.gov.co" rel="noopener">www.dane.gov.co</a>'),
+    }
+
+
+def pulso_macro(hoy, macro=None):
+    macro = leer_macro() if macro is None else macro
     items = []
     for clave in ("trm", "tasa_emisor", "inflacion"):
         d = macro.get(clave, {})
@@ -96,8 +134,12 @@ def pulso_macro(hoy):
                      f'<span class="pulso-nombre">{nombre}</span> <b class="pulso-valor" data-valor="{html.escape(str(d["valor"]), quote=True)}">{texto}</b> '
                      f'<span class="pulso-fecha">{fecha}</span>'
                      + (' <span class="pulso-viejo">desactualizado</span>' if viejo else "") + f' {fuente}</span>')
+    c = citas(macro)
+    notas = "".join(f'<span class="pulso-cita" data-cita="{clave}"><b>{nombre}</b> {c[clave]}</span>'
+                    for clave, nombre in (("trm", "TRM:"), ("tasa_emisor", "Tasa del Emisor:"), ("inflacion", "Inflación:")))
     return (f'<div class="pulso" role="region" aria-label="Pulso macro: cifras oficiales" data-hoy="{hoy.isoformat()}">'
-            f'<div class="envoltura pulso-fila">{"".join(items)}</div></div>')
+            f'<div class="envoltura pulso-fila">{"".join(items)}</div>'
+            f'<p class="envoltura pulso-citas">{notas}</p></div>')
 
 
 def datos_estructurados():
@@ -193,8 +235,10 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
 
 
 def main():
-    pulso = pulso_macro(dt.datetime.now(BOGOTA).date())
-    reemplazos = {"{{AGENDA}}": AGENDA, "{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{WHATSAPP_ROTULO}}": WHATSAPP_ROTULO,
+    macro = leer_macro()
+    pulso = pulso_macro(dt.datetime.now(BOGOTA).date(), macro)
+    c = citas(macro)
+    reemplazos = {"{{CITA_TRM}}": c["trm"], "{{CITA_BANREP}}": c["tasa_emisor"], "{{CITA_DANE}}": c["inflacion"],"{{AGENDA}}": AGENDA, "{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{WHATSAPP_ROTULO}}": WHATSAPP_ROTULO,
                   "{{CORREO}}": "mailto:" + CORREO, "{{CORREO_TEXTO}}": CORREO, "{{PLATAFORMA}}": PLATAFORMA,
                   "{{LIBRO}}": LIBRO_HOTMART or "mailto:" + CORREO + "?subject=Av%C3%ADsame%20cuando%20salga%20Ejecutar%20sin%20Miedo",
                   "{{LIBRO_TEXTO}}": "Comprar en Hotmart" if LIBRO_HOTMART else "Avísame cuando salga"}

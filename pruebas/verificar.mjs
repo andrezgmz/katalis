@@ -249,6 +249,20 @@ for (const p of PAGINAS) {
 // Pulso macro: la franja existe en las 11 páginas y sus cifras salen de datos/web/macro.json.
 {
   const macro = JSON.parse(await readFile(join(RAIZ, "datos/web/macro.json"), "utf8")).indicadores;
+  // Textos exigidos por cada fuente. La prueba los repite a propósito (no los lee del script).
+  const CITA_DANE = "Fuente: Departamento Administrativo Nacional de Estadística: www.dane.gov.co";
+  const LICENCIA_CC = "https://creativecommons.org/licenses/by-sa/4.0/legalcode";
+  const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  // Fecha de consulta del Banco: la de la última consulta exitosa que guardó la tubería, en hora de Bogotá.
+  const consultaBogota = (iso) => { const d = new Date(new Date(iso).getTime() - 5 * 3600e3); return `${d.getUTCDate()} ${MESES[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+  const e = macro.tasa_emisor;
+  const CITAS_ESPERADAS = {
+    trm: "TRM: Superintendencia Financiera de Colombia vía datos.gov.co · CC BY-SA 4.0",
+    tasa_emisor: "Tasa del Emisor: Fuente: Banco de la República." + (e.valor != null && e.ultima_consulta_ok ? ` Consultado el ${consultaBogota(e.ultima_consulta_ok)}.` : ""),
+    inflacion: `Inflación: ${CITA_DANE}`,
+  };
+  const sinEtiquetas = (s) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const textoCitas = (html) => Object.fromEntries([...html.matchAll(/<span class="pulso-cita" data-cita="([a-z_]+)">([\s\S]*?)<\/span>/g)].map((m) => [m[1], sinEtiquetas(m[2])]));
   const OFICIALES = { trm: "https://www.datos.gov.co/", tasa_emisor: "https://suameca.banrep.gov.co/", inflacion: "https://www.dane.gov.co/" };
   const LIMITE = { trm: ["fecha", 7], tasa_emisor: ["ultima_consulta_ok", 45], inflacion: ["fecha_publicacion", 45] };
   const num = (v) => v.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -278,7 +292,22 @@ for (const p of PAGINAS) {
       const marcado = item.includes('data-desactualizado="true"') && item.includes(">desactualizado</span>");
       if (viejo !== marcado) falla(p, "pulso", `${clave}: «desactualizado» = ${marcado}, la regla dice ${viejo}`);
     }
+    // Citas que exige cada fuente (decisión de Andrés, 14-nov-2026), con el texto exacto y la fecha de la tubería.
+    const citas = textoCitas(html);
+    for (const [clave, esperada] of Object.entries(CITAS_ESPERADAS)) {
+      if (citas[clave] !== esperada) falla(p, "citas", `${clave}: «${citas[clave]}», se esperaba «${esperada}»`);
+    }
+    if (!html.includes(`href="${LICENCIA_CC}" rel="license noopener">CC BY-SA 4.0</a>`)) falla(p, "citas", "la TRM no enlaza su licencia CC BY-SA 4.0");
   }
+  // Privacidad: una línea con las tres citas, marcada para revisión de Andrés.
+  const priv = await readFile(join(RAIZ, "privacidad.html"), "utf8");
+  const lineaPriv = sinEtiquetas((priv.match(/<!-- TEXTO LEGAL: revisar Andrés -->\s*<p class="citas-fuentes">([\s\S]*?)<\/p>/) || [])[1] || "");
+  for (const [clave, esperada] of Object.entries(CITAS_ESPERADAS)) {
+    if (!lineaPriv.includes(esperada.replace(/^(TRM|Tasa del Emisor|Inflación): /, ""))) falla("privacidad.html", "citas", `falta la cita de ${clave} en «Cifras publicadas»`);
+  }
+  // Cifras: la tabla de CAC usa la inflación del DANE → cita textual junto a ella.
+  const cif = await readFile(join(RAIZ, "cifras.html"), "utf8");
+  if (sinEtiquetas((cif.match(/<p class="fuente cita-dane">([\s\S]*?)<\/p>/) || [])[1] || "") !== `Inflación: ${CITA_DANE}.`) falla("cifras.html", "citas", "falta la cita del DANE junto a la tabla de CAC");
 }
 
 // Archivos en git: ningún .xlsx fuera de datos/crudo/ (ahí solo van respuestas públicas tal cual, p. ej. el anexo
