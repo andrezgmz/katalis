@@ -17,7 +17,7 @@
     return "Avanzado";
   }
   var $ = function (id) { return document.getElementById(id); };
-  var waBase = $("rd-whatsapp").getAttribute("href").split("?")[0];
+  // El botón «Conversemos sobre su resultado» abre la agenda tal cual: el resultado no sale de esta página.
 
   function nodo(tipo, attrs, padre) {
     var n = document.createElementNS(SVG, tipo);
@@ -86,9 +86,6 @@
     $("rd-riesgo").hidden = r.bajos.length === 0;
     $("rd-bajos").textContent = r.bajos.join(", ");
     svg.setAttribute("aria-label", "Radar: " + r.total + " de 40, " + r.nivel + ". Techo: " + r.techo + ".");
-    // Solo el resultado: ningún dato personal.
-    var texto = "Hice el autodiagnóstico del Radar: " + r.total + "/40, " + r.nivel + "; techo: " + r.techo;
-    $("rd-whatsapp").setAttribute("href", waBase + "?text=" + encodeURIComponent(texto));
   }
 
   preguntas.forEach(function (f) { f.addEventListener("change", actualizar); });

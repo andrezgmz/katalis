@@ -1,6 +1,6 @@
 # Sitio web de Katalis Partners
 
-Sitio estático de Gómez Hernández Consulting S.A.S. (Katalis Partners). Mientras se compra el dominio vive en `https://andrezgmz.github.io/katalis/`.
+Sitio estático de Gómez Hernández Consulting S.A.S. (Katalis Partners). Vive en https://katalispartners.com.co.
 
 No usa frameworks ni paso de compilación: HTML, CSS y JavaScript que el navegador lee tal cual. Dos programas cortos en Python arman las páginas y las cifras.
 
@@ -24,7 +24,7 @@ Los `.html` de la raíz y de `blog/` se generan: no se editan a mano.
 3. `node pruebas/verificar.mjs` → debe decir `0 fallas`.
 4. Commit y push a `main`. GitHub Pages publica en uno o dos minutos.
 
-El teléfono, el correo, LinkedIn y el enlace de Hotmart están al inicio de `scripts/construir_sitio.py`.
+La agenda, el teléfono, los correos, LinkedIn, la dirección de la plataforma, el enlace de Hotmart y el vencimiento de `security.txt` están al inicio de `scripts/construir_sitio.py`. El mismo programa escribe `.well-known/security.txt`; `.nojekyll` hace que GitHub Pages sirva esa carpeta con punto.
 
 ## Actualizar las cifras
 
