@@ -1,0 +1,42 @@
+# Sondeo de fuentes macro nuevas (Etapa A2 del plan de la web, 14-nov-2026).
+# Solo lee: consulta cada fuente candidata una vez y deja el resumen en la ejecución y en un artifact.
+# No escribe en el repositorio, no publica nada y no toca la tubería «datos».
+# Corre al subir cambios del sondeo a su rama y a mano (workflow_dispatch). No corre en horario.
+name: sondeo-fuentes-macro
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sondeo-fuentes-macro]
+    paths: ["scripts/sondeo/**", ".github/workflows/sondeo-fuentes-macro.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sondeo-fuentes-macro
+  cancel-in-progress: false
+
+jobs:
+  sondeo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Traer el código (sin credencial guardada)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Sondear las fuentes (solo lectura)
+        run: |
+          python3 --version
+          python3 scripts/sondeo/sondear.py --salida "$RUNNER_TEMP/sondeo.json"
+
+      - name: Guardar el resumen
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sondeo-fuentes-macro
+          path: ${{ runner.temp }}/sondeo.json
+          if-no-files-found: warn
+          retention-days: 30
