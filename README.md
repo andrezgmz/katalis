@@ -19,10 +19,15 @@ Los `.html` de la raíz y de `blog/` se generan: no se editan a mano.
 
 ## Cambiar un texto
 
-1. Edite el archivo en `contenido/`.
-2. `python scripts/construir_sitio.py`
-3. `node pruebas/verificar.mjs` → debe decir `0 fallas`.
-4. Commit y push a `main`. GitHub Pages publica en uno o dos minutos.
+Nadie empuja a `main`: todo cambio entra por un PR (ver `CLAUDE.md`).
+
+1. Traiga lo último y cree una rama: `git checkout main`, `git pull --ff-only` y `git checkout -b <quien>-<tema>-<fecha>`.
+2. Edite el archivo en `contenido/`.
+3. `python scripts/construir_sitio.py`
+4. `node pruebas/verificar.mjs` → debe decir `0 fallas`.
+5. Commit, suba la rama y abra un PR hacia `main` con qué cambió, quién lo pidió, la salida de la prueba y capturas a 1440 y 390 px. El CI `pruebas` corre solo en el PR.
+6. Revisión: el auditor (SOC) revisa el PR y el CI debe quedar en verde.
+7. Fusiona Andrés, o el Cowork con su «sí». Nunca quien hizo el cambio, nunca `--force`. GitHub Pages publica en uno o dos minutos después de la fusión.
 
 La agenda, el teléfono, los correos, LinkedIn, la dirección de la plataforma, el enlace de Hotmart y el vencimiento de `security.txt` están al inicio de `scripts/construir_sitio.py`. El mismo programa escribe `.well-known/security.txt`; `.nojekyll` hace que GitHub Pages sirva esa carpeta con punto.
 
@@ -31,7 +36,7 @@ La agenda, el teléfono, los correos, LinkedIn, la dirección de la plataforma, 
 1. Ponga el Excel nuevo en `datos/fuente/Datos_graficos_economia_solidaria.xlsx` (esa carpeta no se sube a GitHub).
 2. `python scripts/actualizar_cifras.py`
 3. Revise las referencias de inflación al inicio del mismo programa.
-4. `node pruebas/verificar.mjs` y publique.
+4. `node pruebas/verificar.mjs` y siga los pasos 5 a 7 de «Cambiar un texto» (PR, revisión y fusión de Andrés).
 
 ## Arquitectura de datos
 

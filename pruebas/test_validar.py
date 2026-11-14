@@ -135,6 +135,40 @@ class PruebaTasaEmisor(unittest.TestCase):
             with self.subTest(v=v), self.assertRaisesRegex(ErrorValidacion, "fuera de rango"):
                 validar.tasa_emisor(tpm_json(ultimo=v), {}, HOY)
 
+    # Fechas por delante (corrida 43549211008, 13-nov-2026: la serie llegaba hasta el lunes festivo 16-nov).
+    @staticmethod
+    def tpm_hasta(ultima, valores_finales=(), n=200):
+        """Serie diaria de n filas en 12,25 % que termina en `ultima`; las últimas filas pueden llevar otros valores."""
+        fin = dt.datetime(ultima.year, ultima.month, ultima.day, tzinfo=dt.timezone(dt.timedelta(hours=-5)))
+        fechas = [int((fin - dt.timedelta(days=n - 1 - i)).timestamp() * 1000) for i in range(n)]
+        valores = [12.25] * (n - len(valores_finales)) + list(valores_finales)
+        s = {"id": 59, "nombre": "Tasa de política monetaria", "unidadCorta": "%", "fuente": "Banco de la República",
+             "data": [[f, v] for f, v in zip(fechas, valores)], "fechaUltimoCargue": "13 de noviembre de 2026"}
+        return json.dumps([s]).encode()
+
+    def test_filas_futuras_se_ignoran(self):
+        hoy = dt.date(2026, 11, 13)
+        # 14, 15 y 16 de noviembre son futuras; la del 16 trae otro valor para comprobar que no se usa.
+        r = validar.tasa_emisor(self.tpm_hasta(dt.date(2026, 11, 16), valores_finales=(12.25, 12.25, 9.9)), {}, hoy)
+        self.assertEqual(r["ultimo"], {"fecha": "2026-11-13", "valor": 12.25})
+        self.assertEqual(r["filas_futuras_ignoradas"], 3)
+        self.assertTrue(all(c["desde"] <= "2026-11-13" for c in r["cambios"]))
+        self.assertEqual(calcular.tasa_emisor(r, hoy)["valor"], 12.25)
+
+    def test_solo_futuras_falla(self):
+        with self.assertRaisesRegex(ErrorValidacion, "todas las filas tienen fecha futura"):
+            validar.tasa_emisor(self.tpm_hasta(dt.date(2027, 12, 31)), {}, dt.date(2026, 11, 13))
+
+    def test_normal_sin_futuras(self):
+        r = validar.tasa_emisor(self.tpm_hasta(dt.date(2026, 11, 13)), {}, dt.date(2026, 11, 13))
+        self.assertEqual(r["ultimo"], {"fecha": "2026-11-13", "valor": 12.25})
+        self.assertEqual(r["filas_futuras_ignoradas"], 0)
+
+    def test_trm_conserva_su_regla(self):
+        # La regla de TRM no cambia: vigencia a más de 1 día por delante se rechaza.
+        with self.assertRaisesRegex(ErrorValidacion, "vigencia futura"):
+            validar.trm(trm_json((4000, "2026-11-16", None)), {}, dt.date(2026, 11, 13))
+
     def test_estructura(self):
         with self.assertRaisesRegex(ErrorValidacion, "faltan columnas"):
             validar.tasa_emisor(tpm_json(sin="data"), {}, HOY)

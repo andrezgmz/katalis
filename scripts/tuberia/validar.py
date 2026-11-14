@@ -91,15 +91,21 @@ def tasa_emisor(datos, meta, hoy):
         fecha = dt.datetime.fromtimestamp(par[0] / 1000, BOGOTA).date()
         serie.append((fecha, float(par[1])))
     serie.sort()
+    # La serie 59 publica la tasa vigente con fechas por delante (p. ej. hasta el siguiente día hábil tras un
+    # festivo). Las filas posteriores a hoy en Bogotá se ignoran (no se rechazan) y se usa la vigente a hoy.
+    # Si todas son futuras, algo está mal: falla. Regla solo para tasa_emisor (orden del 14-nov-2026).
+    futuras = [par for par in serie if par[0] > hoy]
+    serie = [par for par in serie if par[0] <= hoy]
+    if not serie:
+        raise ErrorValidacion(f"tasa_emisor: todas las filas tienen fecha futura (la primera es {futuras[0][0]})")
     fecha, valor = serie[-1]
     if not 0 <= valor <= 30:
         raise ErrorValidacion(f"tasa_emisor: valor fuera de rango (0 %–30 %): {valor}")
-    if fecha > hoy + dt.timedelta(days=1):
-        raise ErrorValidacion(f"tasa_emisor: último dato con fecha futura: {fecha}")
     # Los cambios de tasa (solo cuando cambia): pocos datos, suficientes para la historia.
     cambios = [{"desde": f.isoformat(), "valor": v} for i, (f, v) in enumerate(serie) if i == 0 or v != serie[i - 1][1]]
     return {"fuente": "tasa_emisor", "ultimo": {"fecha": fecha.isoformat(), "valor": valor},
-            "cambios": cambios, "fuente_declarada": s["fuente"], "fecha_ultimo_cargue": s["fechaUltimoCargue"]}
+            "cambios": cambios, "fuente_declarada": s["fuente"], "fecha_ultimo_cargue": s["fechaUltimoCargue"],
+            "filas_futuras_ignoradas": len(futuras)}
 
 
 # --------------------------------------------------------------------------- IPC (DANE)
