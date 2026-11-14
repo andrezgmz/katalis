@@ -1,7 +1,7 @@
 {
  "fuente": "tasa_emisor",
  "valor": 12.25,
- "fecha": "2026-11-12",
+ "fecha": "2026-11-13",
  "vigente_desde": "2026-10-01",
- "crudo": "datos/crudo/tasa_emisor/2026-11-12/respuesta.json.gz"
+ "crudo": "datos/crudo/tasa_emisor/2026-11-13/respuesta.json.gz"
 }

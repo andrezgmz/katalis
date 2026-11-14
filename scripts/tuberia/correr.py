@@ -70,6 +70,8 @@ def extraer_fuente(fuente, momento, carpeta, probar_aprobacion=False):
         resultado.update(estado="ok", extension=respuesta["extension"], meta=meta, limpio=limpio,
                          indicador=indicador, anomalias=anomalias)
         linea["filas"] = _filas(limpio)
+        if "filas_futuras_ignoradas" in limpio:  # solo tasa_emisor
+            linea["filas_futuras_ignoradas"] = limpio["filas_futuras_ignoradas"]
     except (ErrorFuente, ErrorValidacion) as e:
         resultado["estado"] = "falla"
         linea.update(resultado="falla", error=f"{type(e).__name__}: {e}")
