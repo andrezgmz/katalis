@@ -13,13 +13,23 @@ import datetime as dt, html, json, pathlib, re
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 
 # Datos que cambian
+# Acción principal «Agendar una conversación»: agenda de Google Calendar (decisión de Andrés, 13-nov-2026).
+AGENDA = ("https://calendar.google.com/calendar/appointments/schedules/"
+          "AcZssZ1uNj8qjBkHzNTpQ3xpwBEC2JpFaiqzCVFoVAZ7U4T3BTQpQwDIKS9i5YP16_GGFQuTDu4y9KL8")
+# WhatsApp es secundario: solo en el pie y en Nosotros.
 WHATSAPP = "573167836311"
+WHATSAPP_ROTULO = "WhatsApp +57 316 783 6311"
 CORREO = "hola@katalispartners.com.co"
+CORREO_SEGURIDAD = "seguridad@katalispartners.com.co"  # Solo en SECURITY.md y /.well-known/security.txt.
+# Perfil personal de Andrés; la página de empresa en LinkedIn se crea después.
 LINKEDIN = "https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo"
+LINKEDIN_ROTULO = "William Andrés Gómez en LinkedIn"
 DOMINIO = "https://katalispartners.com.co"
-# La plataforma Ejecutar sin Miedo (la app no se muda: hay QR y enlaces impresos). Si pasa a un subdominio, se cambia solo aquí.
-PLATAFORMA = "https://andrezgmz.github.io/ejecutar-sin-miedo/"
+# La plataforma Ejecutar sin Miedo, en su subdominio. Se cambia solo aquí.
+PLATAFORMA = "https://app.katalispartners.com.co/ejecutar-sin-miedo/"
 LIBRO_HOTMART = ""  # Pegue aquí el enlace de Hotmart cuando el libro salga a la venta.
+# security.txt (RFC 9116): «Expires» debe quedar a menos de un año. La prueba falla cuando vence: renovarlo aquí.
+SECURITY_TXT_VENCE = "2027-11-01T00:00:00-05:00"
 
 
 LOGO = ('<svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true">'
@@ -90,6 +100,32 @@ def pulso_macro(hoy):
             f'<div class="envoltura pulso-fila">{"".join(items)}</div></div>')
 
 
+def datos_estructurados():
+    """JSON-LD de la firma (solo en index.html). Es un bloque de datos, no código: la CSP no lo ejecuta ni lo bloquea.
+    Solo los datos que aprobó Andrés (13-nov-2026); la prueba revisa que no haya otros."""
+    datos = {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "Katalis Partners",
+        "legalName": "Gómez Hernández Consulting S.A.S.",
+        "url": DOMINIO + "/",
+        "email": CORREO,
+        "telephone": "+" + WHATSAPP,
+        "areaServed": "Colombia",
+        "address": {"@type": "PostalAddress", "addressLocality": "Bogotá", "addressCountry": "CO"},
+        "sameAs": [LINKEDIN],
+    }
+    texto = json.dumps(datos, ensure_ascii=False).replace("<", "\\u003c")
+    return f'<script type="application/ld+json">{texto}</script>\n'
+
+
+def security_txt():
+    return (f"Contact: mailto:{CORREO_SEGURIDAD}\n"
+            f"Expires: {SECURITY_TXT_VENCE}\n"
+            "Preferred-Languages: es\n"
+            f"Canonical: {DOMINIO}/.well-known/security.txt\n")
+
+
 def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
     nivel = ruta.count("/")
     p = "../" * nivel
@@ -98,6 +134,7 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
         for href, txt, clave in MENU)
     WA = "https://wa.me/" + WHATSAPP
     url = DOMINIO + "/" + ("" if ruta == "index.html" else ruta.removesuffix("index.html"))
+    ld = datos_estructurados() if ruta == "index.html" else ""
     html = f'''<!doctype html>
 <html lang="es">
 <head>
@@ -117,14 +154,14 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preload" href="{p}assets/fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{p}assets/css/katalis.css">
-</head>
+{ld}</head>
 <body>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <header class="cabecera">
 <nav aria-label="Principal">
 <a class="marca" href="{p}index.html" aria-label="Katalis Partners, inicio">{LOGO}<span><b>KATALIS</b><small>PARTNERS</small></span></a>
 <button class="menu-boton" aria-expanded="false" aria-controls="menu">Menú</button>
-<div class="menu" id="menu">{items}<a class="menu-plataforma" href="{PLATAFORMA}" rel="noopener">Plataforma</a><a class="boton boton-claro" href="{WA}" rel="noopener">Agendar una conversación</a></div>
+<div class="menu" id="menu">{items}<a class="menu-plataforma" href="{PLATAFORMA}" rel="noopener">Plataforma</a><a class="boton boton-claro" href="{AGENDA}" rel="noopener">Agendar una conversación</a></div>
 </nav>
 </header>
 {pulso}
@@ -138,10 +175,11 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
 <p class="pie-lema">Bajamos la barrera del cambio. Estrategia para organizaciones · Ciencia del cuidado para la salud.</p>
 </div>
 <div><h4>Sitio</h4><ul>{"".join(f'<li><a href="{p}{h}">{t}</a></li>' for h, t, _ in MENU)}</ul></div>
-<div><h4>Contacto</h4><ul>
-<li><a href="{WA}" rel="noopener">WhatsApp</a></li>
-<li><a href="mailto:{CORREO}">Correo</a></li>
-<li><a href="{LINKEDIN}" rel="noopener">LinkedIn</a></li>
+<div class="pie-contacto"><h4>Contacto</h4><ul>
+<li><a href="{AGENDA}" rel="noopener">Agendar una conversación</a></li>
+<li><a href="mailto:{CORREO}">{CORREO}</a></li>
+<li><a href="{WA}" rel="noopener">{WHATSAPP_ROTULO}</a></li>
+<li><a href="{LINKEDIN}" rel="noopener">{LINKEDIN_ROTULO}</a></li>
 </ul></div>
 <div class="legal"><span>Gómez Hernández Consulting S.A.S. (Katalis Partners) · NIT 902.121.376-5 · Bogotá D.C.</span><a href="{p}privacidad.html">Privacidad y datos</a></div>
 </div>
@@ -156,7 +194,8 @@ def pagina(ruta, titulo, descripcion, actual, cuerpo, scripts, pulso=""):
 
 def main():
     pulso = pulso_macro(dt.datetime.now(BOGOTA).date())
-    reemplazos = {"{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{CORREO}}": "mailto:" + CORREO, "{{PLATAFORMA}}": PLATAFORMA,
+    reemplazos = {"{{AGENDA}}": AGENDA, "{{WHATSAPP}}": "https://wa.me/" + WHATSAPP, "{{WHATSAPP_ROTULO}}": WHATSAPP_ROTULO,
+                  "{{CORREO}}": "mailto:" + CORREO, "{{CORREO_TEXTO}}": CORREO, "{{PLATAFORMA}}": PLATAFORMA,
                   "{{LIBRO}}": LIBRO_HOTMART or "mailto:" + CORREO + "?subject=Av%C3%ADsame%20cuando%20salga%20Ejecutar%20sin%20Miedo",
                   "{{LIBRO_TEXTO}}": "Comprar en Hotmart" if LIBRO_HOTMART else "Avísame cuando salga"}
     hechas = []
@@ -173,7 +212,9 @@ def main():
         hechas.append(ruta)
     urls = "".join(f"<url><loc>{DOMINIO}/{'' if r == 'index.html' else r.removesuffix('index.html')}</loc></url>" for r in hechas if r != "404.html")
     (RAIZ / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8", newline="\n")
-    print("OK:", len(hechas), "páginas y sitemap.xml:", ", ".join(hechas))
+    (RAIZ / ".well-known").mkdir(exist_ok=True)
+    (RAIZ / ".well-known" / "security.txt").write_text(security_txt(), encoding="utf-8", newline="\n")
+    print("OK:", len(hechas), "páginas, sitemap.xml y .well-known/security.txt:", ", ".join(hechas))
 
 
 if __name__ == "__main__":

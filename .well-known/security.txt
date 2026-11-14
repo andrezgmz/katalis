@@ -1,0 +1,4 @@
+Contact: mailto:seguridad@katalispartners.com.co
+Expires: 2027-11-01T00:00:00-05:00
+Preferred-Languages: es
+Canonical: https://katalispartners.com.co/.well-known/security.txt

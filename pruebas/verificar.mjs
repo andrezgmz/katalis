@@ -14,6 +14,11 @@ const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const TIPOS = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
 const PAGINAS = ["index.html", "estrategia.html", "salud.html", "cifras.html", "libro.html", "nosotros.html", "privacidad.html", "404.html", "blog/index.html", "blog/el-ahorro-llega-mas-rapido.html", "blog/la-madurez-digital-no-se-compra.html"];
 const VISTAS = { escritorio: { width: 1440, height: 900 }, celular: { width: 390, height: 844 } };
+// Contacto (decisiones de Andrés, 13-nov-2026). La prueba repite los valores a propósito: no los lee del script.
+const AGENDA = "https://calendar.google.com/calendar/appointments/schedules/AcZssZ1uNj8qjBkHzNTpQ3xpwBEC2JpFaiqzCVFoVAZ7U4T3BTQpQwDIKS9i5YP16_GGFQuTDu4y9KL8";
+const PLATAFORMA = "https://app.katalispartners.com.co/ejecutar-sin-miedo/";
+const WA = "https://wa.me/573167836311";
+const LINKEDIN = "https://www.linkedin.com/in/william-andr%C3%A9s-g%C3%B3mez-lizarazo";
 
 const servidor = createServer(async (req, res) => {
   const ruta = normalize(decodeURIComponent(new URL(req.url, "http://x").pathname)).replace(/^([/\\])+/, "");
@@ -70,7 +75,7 @@ for (const [tab, id] of [["tab-sector", "g-activos-anio"], ["tab-cac", "g-indice
 }
 await pag.close();
 
-// Demo del Radar (estrategia.html): cortes, techo, sin red, WhatsApp solo con el resultado.
+// Demo del Radar (estrategia.html): cortes, techo, sin red; el botón abre la agenda sin llevarse el resultado.
 {
   const V = "radar";
   const rd = await navegador.newPage({ viewport: VISTAS.escritorio });
@@ -86,7 +91,7 @@ await pag.close();
     nivel: document.getElementById("rd-nivel").textContent,
     techo: document.getElementById("rd-techo").textContent,
     bajos: document.getElementById("rd-riesgo").hidden ? "" : document.getElementById("rd-bajos").textContent,
-    wa: document.getElementById("rd-whatsapp").href,
+    agendar: document.getElementById("rd-agendar").href,
     puntos: document.querySelectorAll("#rd-radar .rd-punto").length,
   }));
   const nivelDe = (t) => (t < 17 ? "Inicial" : t < 28 ? "En desarrollo" : t < 36 ? "Consolidado" : "Avanzado");
@@ -102,23 +107,20 @@ await pag.close();
     if (!r.listo || r.total !== String(objetivo) || r.nivel !== nivelDe(objetivo)) falla("estrategia.html", V, `total ${objetivo}: se vio ${r.total} «${r.nivel}», se esperaba «${nivelDe(objetivo)}»`);
     if (r.puntos !== 8) falla("estrategia.html", V, `radar con ${r.puntos} puntos`);
   }
-  // Techo, ejes bajo 2 y el mensaje de WhatsApp (solo el resultado).
+  // Techo, ejes bajo 2 y el botón de la agenda: la misma dirección del menú, sin el resultado ni parámetros.
   const casos = [
     { vals: [4, 4, 4, 4, 4, 2, 4, 4], techo: EJES[5], bajos: "" },
     { vals: [3, 1, 4, 4, 5, 1, 4, 4], techo: `${EJES[1]}, ${EJES[5]}`, bajos: `${EJES[1]}, ${EJES[5]}` },
     { vals: [3, 3, 3, 3, 3, 3, 3, 3], techo: "ejes parejos, todos en 3", bajos: "" },
   ];
-  const waMenu = await rd.$eval(".menu a[href^='https://wa.me/']", (a) => a.href);
+  const agendaMenu = await rd.$eval(".menu a.boton", (a) => a.href);
+  if (agendaMenu !== AGENDA) falla("estrategia.html", V, `«Agendar» del menú: ${agendaMenu}`);
   for (const c of casos) {
     await responder(c.vals);
     const r = await leer();
-    const total = c.vals.reduce((a, b) => a + b, 0);
     if (r.techo !== c.techo) falla("estrategia.html", V, `techo «${r.techo}», se esperaba «${c.techo}»`);
     if (r.bajos !== c.bajos) falla("estrategia.html", V, `ejes bajo 2 «${r.bajos}», se esperaba «${c.bajos}»`);
-    const esperado = `${waMenu}?text=${encodeURIComponent(`Hice el autodiagnóstico del Radar: ${total}/40, ${nivelDe(total)}; techo: ${c.techo}`)}`;
-    if (r.wa !== esperado) falla("estrategia.html", V, `WhatsApp: ${r.wa}`);
-    const u = new URL(r.wa);
-    if ([...u.searchParams.keys()].join() !== "text") falla("estrategia.html", V, `WhatsApp con parámetros de más: ${u.search}`);
+    if (r.agendar !== AGENDA) falla("estrategia.html", V, `«Conversemos sobre su resultado» abre ${r.agendar}, se esperaba la agenda sin parámetros`);
     // Ejes bajo 2: en Estrategia solo Señal es acento. Rótulo en blanco roto y negrita, punto hueco; nunca coral ni arcilla.
     if (c.bajos) {
       const estilos = await rd.evaluate(() => {
@@ -160,7 +162,7 @@ await pag.close();
   if (!(await rd.$eval('input[name="rd-1"][value="4"]', (i) => i.checked))) falla("estrategia.html", V, "la flecha del teclado no cambia la respuesta");
   if (pedidos.length) falla("estrategia.html", V, `${pedidos.length} pedidos de red al responder: ${pedidos.slice(0, 3).join(" | ")}`);
   // La plataforma: en el menú de todas las páginas y en la sección, misma pestaña, rel=noopener.
-  const plataforma = await rd.$$eval("a[href^='https://andrezgmz.github.io/ejecutar-sin-miedo/']", (as) => as.map((a) => `${a.rel}|${a.target}`));
+  const plataforma = await rd.$$eval(`a[href="${PLATAFORMA}"]`, (as) => as.map((a) => `${a.rel}|${a.target}`));
   if (plataforma.length !== 2 || plataforma.some((x) => x !== "noopener|")) falla("estrategia.html", V, `enlaces a la plataforma: ${plataforma.join(", ")}`);
   await rd.close();
 
@@ -191,12 +193,58 @@ await pag.close();
 
 // Reglas de SECURITY.md que se leen en el código: CSP igual en todas las páginas, sin innerHTML ni código en línea.
 const CSP = `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests`;
+// Única excepción: un bloque de datos JSON-LD (no ejecutable) en index.html, con solo los datos aprobados.
+const LD_RE = /<script type="application\/ld\+json">([^<]*)<\/script>/g;
+const LD_ESPERADO = {
+  "@context": "https://schema.org", "@type": "ProfessionalService", name: "Katalis Partners",
+  legalName: "Gómez Hernández Consulting S.A.S.", url: "https://katalispartners.com.co/", email: "hola@katalispartners.com.co",
+  telephone: "+573167836311", areaServed: "Colombia",
+  address: { "@type": "PostalAddress", addressLocality: "Bogotá", addressCountry: "CO" }, sameAs: [LINKEDIN],
+};
 for (const p of PAGINAS) {
   const html = await readFile(join(RAIZ, p), "utf8");
   const csp = (html.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1];
   if (csp !== CSP) falla(p, "código", "la CSP cambió");
-  if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html) || /\sstyle=/i.test(html) || /\son[a-z]+=/i.test(html)) falla(p, "código", "código o estilo en línea");
-  if (!html.includes('class="menu-plataforma" href="https://andrezgmz.github.io/ejecutar-sin-miedo/" rel="noopener"')) falla(p, "código", "falta «Plataforma» en el menú");
+  const bloques = [...html.matchAll(LD_RE)];
+  const sinLd = html.replace(LD_RE, "");
+  if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(sinLd) || /\sstyle=/i.test(html) || /\son[a-z]+=/i.test(html)) falla(p, "código", "código o estilo en línea");
+  if (p === "index.html") {
+    if (bloques.length !== 1) falla(p, "código", `${bloques.length} bloques JSON-LD (se espera 1)`);
+    else {
+      let ld = null;
+      try { ld = JSON.parse(bloques[0][1]); } catch (e) { falla(p, "código", "JSON-LD inválido: " + e.message); }
+      if (ld && JSON.stringify(ld) !== JSON.stringify(LD_ESPERADO)) falla(p, "código", "JSON-LD con datos distintos a los aprobados: " + JSON.stringify(ld));
+    }
+  } else if (bloques.length) falla(p, "código", "JSON-LD fuera de index.html");
+  if (!html.includes(`class="menu-plataforma" href="${PLATAFORMA}" rel="noopener"`)) falla(p, "código", "falta «Plataforma» en el menú");
+  if (!html.includes(`<a class="boton boton-claro" href="${AGENDA}" rel="noopener">Agendar una conversación</a></div>`)) falla(p, "contacto", "«Agendar una conversación» del menú no abre la agenda");
+  // Pie igual en todas las páginas: agenda, correo, WhatsApp, LinkedIn y la línea legal; sin dirección física.
+  const pie = (html.match(/<footer class="pie">[\s\S]*<\/footer>/) || [""])[0];
+  const contacto = ((pie.match(/<div class="pie-contacto"><h4>Contacto<\/h4><ul>([\s\S]*?)<\/ul><\/div>/) || [])[1] || "").replace(/\r\n/g, "\n");
+  const esperado = `\n<li><a href="${AGENDA}" rel="noopener">Agendar una conversación</a></li>\n<li><a href="mailto:hola@katalispartners.com.co">hola@katalispartners.com.co</a></li>\n<li><a href="${WA}" rel="noopener">WhatsApp +57 316 783 6311</a></li>\n<li><a href="${LINKEDIN}" rel="noopener">William Andrés Gómez en LinkedIn</a></li>\n`;
+  if (contacto !== esperado) falla(p, "contacto", "el pie no tiene el contacto acordado");
+  if (!pie.includes("Gómez Hernández Consulting S.A.S. (Katalis Partners) · NIT 902.121.376-5 · Bogotá D.C.")) falla(p, "contacto", "falta la línea legal en el pie");
+  // WhatsApp es secundario: fuera del pie solo puede estar en Nosotros.
+  const waFuera = (html.replace(pie, "").match(/https:\/\/wa\.me\//g) || []).length;
+  if (p === "nosotros.html" ? waFuera !== 1 : waFuera !== 0) falla(p, "contacto", `${waFuera} enlaces a WhatsApp fuera del pie`);
+  // Ningún rastro de la dirección vieja de la web ni de la app.
+  if (html.includes("andrezgmz.github.io")) falla(p, "contacto", "queda la dirección vieja andrezgmz.github.io");
+  // Correos públicos: solo hola@ en las páginas (seguridad@ va solo en SECURITY.md y security.txt).
+  const correos = new Set(html.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/g) || []);
+  if ([...correos].some((c) => c !== "hola@katalispartners.com.co")) falla(p, "contacto", `correos no permitidos: ${[...correos].join(", ")}`);
+}
+// /.well-known/security.txt (RFC 9116): contacto de seguridad, vence a menos de un año, español, canónico.
+{
+  const txt = await readFile(join(RAIZ, ".well-known/security.txt"), "utf8").catch(() => "");
+  const campo = (k) => (txt.match(new RegExp(`^${k}: (.+)$`, "m")) || [])[1];
+  if (campo("Contact") !== "mailto:seguridad@katalispartners.com.co") falla("security.txt", "código", `Contact: ${campo("Contact")}`);
+  if (campo("Preferred-Languages") !== "es") falla("security.txt", "código", "falta Preferred-Languages: es");
+  if (campo("Canonical") !== "https://katalispartners.com.co/.well-known/security.txt") falla("security.txt", "código", `Canonical: ${campo("Canonical")}`);
+  const vence = new Date(campo("Expires") || "x"), ahora = new Date();
+  if (!(vence > ahora)) falla("security.txt", "código", `Expires vencido o inválido (${campo("Expires")}): renovar SECURITY_TXT_VENCE en scripts/construir_sitio.py`);
+  if (vence - ahora > 365 * 864e5) falla("security.txt", "código", "Expires a más de un año (RFC 9116)");
+  const r = await fetch(BASE + ".well-known/security.txt");
+  if (r.status !== 200) falla("security.txt", "código", `el servidor local responde ${r.status}`);
 }
 // Pulso macro: la franja existe en las 11 páginas y sus cifras salen de datos/web/macro.json.
 {
